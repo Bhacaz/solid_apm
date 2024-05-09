@@ -22,3 +22,8 @@ Things you may want to cover:
 * Deployment instructions
 
 * ...
+
+## Notes
+
+https://github.com/vasturiano/timelines-chart
+https://apexcharts.com/javascript-chart-demos/timeline-charts/advanced/

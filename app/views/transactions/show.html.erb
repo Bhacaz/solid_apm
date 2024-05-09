@@ -1,0 +1,4 @@
+
+<h1>Name: <%= @transaction.name %></h1>
+
+<%= render template: 'spans/index', collection: @transaction.spans, locals: { spans: @transaction.spans } %>
