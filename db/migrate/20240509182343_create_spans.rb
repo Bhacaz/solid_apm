@@ -9,6 +9,7 @@ class CreateSpans < ActiveRecord::Migration[7.1]
       t.string :name
       t.string :type
       t.string :subtype
+      t.string :summary
       t.datetime :end_time
       t.float :duration
       t.json :caller

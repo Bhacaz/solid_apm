@@ -1,18 +1,20 @@
-<table>
+<table class="table">
   <thead>
-  <tr>
-    <% Span.attribute_names.each do |attribute| %>
-      <th scope="col"><%= attribute.humanize %></th>
-    <% end %>
-  </tr>
-  </thead>
-  <tbody>
-  <% spans.each do |span| %>
     <tr>
-      <% span.attributes.each do |attribute| %>
-        <td><%= attribute[1] %></td>
+      <% Span.attribute_names.each do |attribute| %>
+        <% next if attribute.to_s.end_with?('_at') %>
+        <th scope="col"><%= attribute.humanize %></th>
       <% end %>
     </tr>
-  <% end %>
+  </thead>
+  <tbody>
+    <% spans.each do |span| %>
+      <tr>
+        <% span.attributes.each do |attribute| %>
+          <% next if attribute[0].to_s.end_with?('_at') %>
+          <td><%= attribute[1] %></td>
+        <% end %>
+      </tr>
+    <% end %>
   </tbody>
 </table>

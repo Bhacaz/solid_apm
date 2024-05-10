@@ -20,6 +20,7 @@ ActiveRecord::Schema[7.1].define(version: 2024_05_09_182343) do
     t.string "name"
     t.string "type"
     t.string "subtype"
+    t.string "summary"
     t.datetime "end_time"
     t.float "duration"
     t.json "caller"
@@ -38,7 +39,7 @@ ActiveRecord::Schema[7.1].define(version: 2024_05_09_182343) do
     t.string "name"
     t.json "metadata"
     t.datetime "end_time"
-    t.integer "duration"
+    t.float "duration"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.index ["name"], name: "index_transactions_on_name"

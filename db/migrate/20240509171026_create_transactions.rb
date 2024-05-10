@@ -10,7 +10,7 @@ class CreateTransactions < ActiveRecord::Migration[7.1]
       # t.string :query_params
       t.json :metadata
       t.datetime :end_time
-      t.integer :duration
+      t.float :duration # in ms
 
       t.timestamps
     end

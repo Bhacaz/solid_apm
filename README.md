@@ -26,4 +26,4 @@ Things you may want to cover:
 ## Notes
 
 https://github.com/vasturiano/timelines-chart
-https://apexcharts.com/javascript-chart-demos/timeline-charts/advanced/
+https://apexcharts.com/javascript-chart-demos/timeline-charts/advanced
