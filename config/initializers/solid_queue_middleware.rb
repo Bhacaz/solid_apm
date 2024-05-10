@@ -1,62 +1,42 @@
 # frozen_string_literal: true
 
-# Not start with `!`
-ActiveSupport::Notifications.subscribe(/^\w+\.action_view/) do |name, start, finish, id, payload|
-  # pp name
-  # pp payload.first(3)
-  identifier = payload[:identifier]
-  # relative to Rails.root
-  identifier = identifier.sub(Rails.root.to_s + '/', '')
+# ActiveSupport::Notifications.subscribe(/.*/) do |name, start, finish, id, payload|
+#   pp name unless name.start_with?("!")
+#   pp payload.first(3) unless name.start_with?("!")
+# end
 
-  transaction = ApplicationController.transaction
-
-  # p transaction
-  # pp caller
-  next unless transaction
-
-  parent_id = ApplicationController.spans.last&.dig(:id)
-  subtype, type = name.split('.')
-  # pp payload[:sql]
-  span = {
+ActiveSupport::Notifications.subscribe("start_processing.action_controller") do |name, start, finish, id, payload|
+  SpanSubscriber::Base.transaction = Transaction.new(
     uuid: SecureRandom.uuid,
-    # related_transaction: transaction,
-    parent_id: parent_id,
-    sequence: ApplicationController.spans.size + 1,
-    timestamp: start,
-    end_time: finish,
-    duration: (finish.to_f - start.to_f).round(6),
-    name: name,
-    type: type,
-    subtype: subtype,
-    summary: identifier,
-  }
-
-  ApplicationController.spans << span
+    timestamp: Time.current,
+    type: 'request',
+    name: "#{payload[:controller]}##{payload[:action]}",
+    metadata: { params: payload[:request].params.except(:controller, :action) }
+  )
+  SpanSubscriber::Base.spans = []
 end
 
-ActiveSupport::Notifications.subscribe("sql.active_record") do |name, start, finish, id, payload|
-  # p name
-  transaction = ApplicationController.transaction
-  # p transaction
-  # pp caller
-  next unless transaction
+ActiveSupport::Notifications.subscribe("process_action.action_controller") do |name, start, finish, id, payload|
+  transaction = SpanSubscriber::Base.transaction
+  transaction.end_time = Time.current
+  transaction.duration = (transaction.end_time.to_f - transaction.timestamp.to_f).round(6)
+  SpanSubscriber::Base.transaction = nil
+  ApplicationRecord.transaction do
+    transaction.save!
 
-  parent_id = ApplicationController.spans.last&.dig(:id)
-  subtype, type = name.split('.')
-  # pp payload[:sql]
-  span = {
-    uuid: SecureRandom.uuid,
-    # related_transaction: transaction,
-    parent_id: parent_id,
-    sequence: ApplicationController.spans.size + 1,
-    timestamp: start,
-    end_time: finish,
-    duration: (finish.to_f - start.to_f).round(6),
-    name: name,
-    type: type,
-    subtype: subtype,
-    summary: payload[:sql],
-  }
+    SpanSubscriber::Base.spans.each do |span|
+      # Span.new(**span, related_transaction: transaction)
+      span[:transaction_id] = transaction.id
+    end
+    Span.insert_all SpanSubscriber::Base.spans
+  end
+  SpanSubscriber::Base.spans = nil
+end
 
-  ApplicationController.spans << span
+ActiveSupport.on_load(:action_controller) do
+  # SpanSubscriber::Base.subscribe!
+  SpanSubscriber::ActionView.subscribe
+  SpanSubscriber::SqlActiveRecord.subscribe
+
+
 end
