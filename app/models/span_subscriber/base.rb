@@ -16,8 +16,7 @@ module SpanSubscriber
 
     def self.subscribe
       ActiveSupport::Notifications.subscribe(self::PATTERN) do |name, start, finish, id, payload|
-        transaction = Base.transaction
-        next unless transaction
+        next unless SpanSubscriber::Base.transaction
 
         parent_id = Base.spans.last&.dig(:id)
         subtype, type = name.split('.')
@@ -27,14 +26,14 @@ module SpanSubscriber
           sequence: Base.spans.size + 1,
           timestamp: start,
           end_time: finish,
-          duration: (finish.to_f - start.to_f).round(6),
+          duration: ((finish.to_f - start.to_f) * 1000).round(2),
           name: name,
           type: type,
           subtype: subtype,
           summary: self.new.summary(payload),
         }
 
-        Base.spans << span
+        SpanSubscriber::Base.spans << span
       end
     end
 

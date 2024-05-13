@@ -19,7 +19,7 @@ end
 ActiveSupport::Notifications.subscribe("process_action.action_controller") do |name, start, finish, id, payload|
   transaction = SpanSubscriber::Base.transaction
   transaction.end_time = Time.current
-  transaction.duration = (transaction.end_time.to_f - transaction.timestamp.to_f).round(6)
+  transaction.duration = ((transaction.end_time.to_f - transaction.timestamp.to_f) * 1000).round(2)
   SpanSubscriber::Base.transaction = nil
   ApplicationRecord.transaction do
     transaction.save!
@@ -33,10 +33,8 @@ ActiveSupport::Notifications.subscribe("process_action.action_controller") do |n
   SpanSubscriber::Base.spans = nil
 end
 
-ActiveSupport.on_load(:action_controller) do
+Rails.application.config.after_initialize do
   # SpanSubscriber::Base.subscribe!
   SpanSubscriber::ActionView.subscribe
   SpanSubscriber::SqlActiveRecord.subscribe
-
-
 end
