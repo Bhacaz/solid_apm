@@ -1,27 +1,12 @@
-# README
+# solid_apm
 
-This README would normally document whatever steps are necessary to get the
-application up and running.
+Rails engine to manage APM data without using a third party service.
 
-Things you may want to cover:
+## Description
 
-* Ruby version
-
-* System dependencies
-
-* Configuration
-
-* Database creation
-
-* Database initialization
-
-* How to run the test suite
-
-* Services (job queues, cache servers, search engines, etc.)
-
-* Deployment instructions
-
-* ...
+> [!IMPORTANT]
+> Still work in progress.
+> It need to be transformed into a Rails engine.
 
 ## Notes
 
