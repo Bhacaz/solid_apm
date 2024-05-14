@@ -18,15 +18,17 @@ module SpanSubscriber
       ActiveSupport::Notifications.subscribe(self::PATTERN) do |name, start, finish, id, payload|
         next unless SpanSubscriber::Base.transaction
 
-        parent_id = Base.spans.last&.dig(:id)
+        parent_id = SpanSubscriber::Base.spans.last&.dig(:id)
         subtype, type = name.split('.')
+        duration = ((finish.to_f - start.to_f) * 1000).round(6)
+
         span = {
           uuid: SecureRandom.uuid,
           parent_id: parent_id,
-          sequence: Base.spans.size + 1,
+          sequence: SpanSubscriber::Base.spans.size + 1,
           timestamp: start,
           end_time: finish,
-          duration: ((finish.to_f - start.to_f) * 1000).round(2),
+          duration: duration,
           name: name,
           type: type,
           subtype: subtype,

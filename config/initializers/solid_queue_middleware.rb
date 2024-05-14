@@ -19,7 +19,7 @@ end
 ActiveSupport::Notifications.subscribe("process_action.action_controller") do |name, start, finish, id, payload|
   transaction = SpanSubscriber::Base.transaction
   transaction.end_time = Time.current
-  transaction.duration = ((transaction.end_time.to_f - transaction.timestamp.to_f) * 1000).round(2)
+  transaction.duration = ((transaction.end_time.to_f - transaction.timestamp.to_f) * 1000).round(6)
   SpanSubscriber::Base.transaction = nil
   ApplicationRecord.transaction do
     transaction.save!

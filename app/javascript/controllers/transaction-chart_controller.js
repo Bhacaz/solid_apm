@@ -1,12 +1,22 @@
 import {Controller} from "@hotwired/stimulus"
 import ApexCharts from 'apexcharts'
 
+// unload chart https://github.com/Deanout/weight_tracker/blob/d4123acb952d91fcc9bedb96bbd786088a71482a/app/javascript/controllers/weights_controller.js#L4
+// tooltip: {
+//   y: {
+//     formatter: function (value, {series, seriesIndex, dataPointIndex, w}) {
+//       return w.globals.initialSeries[seriesIndex].data[dataPointIndex].name + "\n" + value + "ms"
+//     }
+//   }
+// }
+
 // Connects to data-controller="transaction-chart"
 export default class extends Controller {
   connect() {
     var options = {
       chart: {
-        type: 'line'
+        type: 'bar',
+        height: '200em'
       },
       series: [{
         name: 'Duration',
@@ -15,9 +25,9 @@ export default class extends Controller {
         type: 'datetime'
       },
       tooltip: {
-        y: {
-          formatter: function (value, {series, seriesIndex, dataPointIndex, w}) {
-            return w.globals.initialSeries[seriesIndex].data[dataPointIndex].name + "\n" + value + "ms"
+        x: {
+          formatter: function (value) {
+            return new Date(value).toLocaleString()
           }
         }
       }
@@ -25,12 +35,21 @@ export default class extends Controller {
     fetch('/transactions.json')
       .then(response => response.json())
       .then(data => {
-        options.series[0].data = data.map(d => {
-          return {x: d.timestamp, y: d.duration, name: d.name}
-        })
-        const chart = new ApexCharts(this.element, options)
-        chart.render()
+        const transformedData = []
+        for (let [key, value] of Object.entries(data)) {
+          transformedData.push({x: key, y: value})
+        }
+        options.series[0].data = transformedData
+        this.chart = new ApexCharts(this.element, options)
+        this.chart.render()
       })
+  }
 
+  // Unloads the chart before loading new data.
+  disconnect() {
+    if (this.chart) {
+      this.chart.destroy();
+      this.chart = null;
+    }
   }
 }
