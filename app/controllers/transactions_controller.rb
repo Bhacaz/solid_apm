@@ -13,7 +13,8 @@ class TransactionsController < ApplicationController
 
   def spans
     @transaction = Transaction.find(params[:id])
-    @spans = @transaction.spans
+    @spans = @transaction.spans.to_a
+    @spans.prepend(@transaction)
     render json: @spans
   end
 

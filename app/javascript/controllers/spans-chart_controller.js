@@ -33,8 +33,8 @@ export default class extends Controller {
         //   console.log(opts)
           // console.log(value)
           return (
-            '<div class="apexcharts-tooltip-title has-text-black">' +
-            (y2 - y1) + "ms" + "<br>" + w.globals.initialSeries[seriesIndex].data[dataPointIndex].summary +
+            '<div class="apexcharts-tooltip-title has-text-black" style="max-width: 40em; text-wrap: balance;">' +
+            w.globals.initialSeries[seriesIndex].data[dataPointIndex].duration + "ms" + "<br>" + w.globals.initialSeries[seriesIndex].data[dataPointIndex].summary +
             '</div>'
           )
         }
@@ -67,7 +67,8 @@ export default class extends Controller {
             x: d.uuid,
             y: [startTime, endTime],
             name: d.name,
-            summary: d.summary
+            summary: d.summary || d.name,
+            duration: this.round(d.duration, 2)
           }
         })
         this.chart = new ApexCharts(this.element, options)
@@ -80,5 +81,10 @@ export default class extends Controller {
       this.chart.destroy()
       this.chart = null
     }
+  }
+
+  round(num, decimalPlaces = 0) {
+    num = Math.round(num + "e" + decimalPlaces);
+    return Number(num + "e" + -decimalPlaces);
   }
 }
