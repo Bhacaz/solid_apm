@@ -13,14 +13,16 @@ class TransactionsController < ApplicationController
 
   def spans
     @transaction = Transaction.find(params[:id])
-    @spans = @transaction.spans.to_a
-    @spans.prepend(@transaction)
+    @spans = @transaction.spans
     render json: @spans
   end
 
   private
 
   def transactions_count_by_minutes
-    Transaction.all.order(timestamp: :desc).where(created_at: 1.hour.ago..).group_by { |t| t.created_at.beginning_of_minute }.transform_values!(&:count)
+    Transaction.all.order(timestamp: :desc)
+               .where(created_at: 1.hour.ago..)
+               .group_by { |t| t.created_at.beginning_of_minute }
+               .transform_values!(&:count)
   end
 end

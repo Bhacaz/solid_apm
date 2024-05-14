@@ -24,9 +24,10 @@ ActiveSupport::Notifications.subscribe("process_action.action_controller") do |n
 end
 
 Rails.application.config.after_initialize do
-  # SpanSubscriber::Base.subscribe!
+  # SpanSubscriber::Base.subscribe
   SpanSubscriber::ActionView.subscribe
   SpanSubscriber::SqlActiveRecord.subscribe
+  SpanSubscriber::ActionController.subscribe
 end
 
 class SolidApmMiddleware
@@ -40,6 +41,7 @@ class SolidApmMiddleware
       self.class.call
     rescue StandardError => e
       Rails.logger.error e
+      Rails.logger.error e.backtrace.join("\n")
     end
 
     @app.call(env)
@@ -47,6 +49,8 @@ class SolidApmMiddleware
 
   def self.call
     transaction = SpanSubscriber::Base.transaction
+    return unless transaction
+
     SpanSubscriber::Base.transaction = nil
     ApplicationRecord.transaction do
       transaction.save!

@@ -34,7 +34,11 @@ export default class extends Controller {
           // console.log(value)
           return (
             '<div class="apexcharts-tooltip-title has-text-black" style="max-width: 40em; text-wrap: balance;">' +
-            w.globals.initialSeries[seriesIndex].data[dataPointIndex].duration + "ms" + "<br>" + w.globals.initialSeries[seriesIndex].data[dataPointIndex].summary +
+            w.globals.initialSeries[seriesIndex].data[dataPointIndex].duration + "ms" +
+            "<br>" +
+            w.globals.initialSeries[seriesIndex].data[dataPointIndex].name +
+            "<br>" +
+            w.globals.initialSeries[seriesIndex].data[dataPointIndex].summary +
             '</div>'
           )
         }

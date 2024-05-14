@@ -2,7 +2,9 @@
 
 module SpanSubscriber
   class Base
-    cattr_accessor :subscribers, default: Set.new
+    # PATTERN = /.*/
+
+    class_attribute :subscribers, default: Set.new
     thread_cattr_accessor :transaction
     thread_cattr_accessor :spans
 
@@ -38,6 +40,14 @@ module SpanSubscriber
         SpanSubscriber::Base.spans << span
       end
     end
+
+    # def summary(payload)
+    #   if payload.is_a?(Hash)
+    #     payload.first.last.inspect
+    #   else
+    #     payload.inspect
+    #   end
+    # end
 
     # private_class_method :subscribe
   end
