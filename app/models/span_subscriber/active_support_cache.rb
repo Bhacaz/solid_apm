@@ -1,11 +1,11 @@
 # frozen_string_literal: true
 
 module SpanSubscriber
-  class SqlActiveRecord < Base
-    PATTERN = "sql.active_record"
+  class ActiveSupportCache < Base
+    PATTERN = /^cache_.+.active_support/
 
     def summary(payload)
-      payload[:sql]
+      payload[:key]
     end
   end
 end
