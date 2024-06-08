@@ -55,3 +55,5 @@ group :development do
   # gem "spring"
 end
 
+
+gem 'solid_apm', path: 'solid_apm'
