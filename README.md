@@ -50,10 +50,6 @@ Go to `http://localhost:3000/solid_apm` and start monitoring your application.
 - [ ] Allow date range transactions index
 - [ ] Display transaction as aggregated data with avg latency, tpm and impact (Relative Avg. duration * transactions per minute)
 
-## Notes
-
-https://apexcharts.com/javascript-chart-demos/timeline-charts/advanced
-
 ## Contributing
 Contribution directions go here.
 
