@@ -21,7 +21,7 @@ window.Stimulus.register('transaction-chart',
         height: '200em'
       },
       series: [{
-        name: 'Duration',
+        name: 'tpm',
       }],
       xaxis: {
         type: 'datetime'
