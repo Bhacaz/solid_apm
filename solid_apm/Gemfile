@@ -1,12 +1,11 @@
 source "https://rubygems.org"
-git_source(:github) { |repo| "https://github.com/#{repo}.git" }
 
 # Specify your gem's dependencies in solid_apm.gemspec.
 gemspec
 
 gem "puma"
 
-gem "sqlite3"
+gem "sqlite3", "~> 1.4"
 
 gem "sprockets-rails"
 
