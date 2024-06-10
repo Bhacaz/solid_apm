@@ -6,7 +6,7 @@
 <table class="table">
   <thead>
     <tr>
-      <% Transaction.attribute_names.each do |attribute| %>
+      <% SolidApm::Transaction.attribute_names.each do |attribute| %>
         <% next if attribute.to_s.end_with?('_at') %>
         <th scope="col"><%= attribute.humanize %></th>
       <% end %>

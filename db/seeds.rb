@@ -8,27 +8,27 @@
 #     MovieGenre.find_or_create_by!(name: genre_name)
 #   end
 
-transaction = Transaction.create!(
-  timestamp: Time.current,
-  type: 'request',
-  name: 'Home#index',
-  metadata: { status: 200 },
-  end_time: Time.current + 1.second,
-  duration: 1.second,
-  uuid: SecureRandom.uuid
-)
-
-span = Span.create!(
-  uuid: SecureRandom.uuid,
-  related_transaction: transaction,
-  parent_id: nil,
-  sequence: 1,
-  timestamp: Time.current,
-  name: 'sql.active_record',
-  type: 'active_record',
-  subtype: 'sql',
-  end_time: Time.current + 1.second,
-  duration: 1.second,
-  caller: ["app/models/user.rb:123:in `find_by_email'"]
-)
-
+# transaction = Transaction.create!(
+#   timestamp: Time.current,
+#   type: 'request',
+#   name: 'Home#index',
+#   metadata: { status: 200 },
+#   end_time: Time.current + 1.second,
+#   duration: 1.second,
+#   uuid: SecureRandom.uuid
+# )
+#
+# span = Span.create!(
+#   uuid: SecureRandom.uuid,
+#   related_transaction: transaction,
+#   parent_id: nil,
+#   sequence: 1,
+#   timestamp: Time.current,
+#   name: 'sql.active_record',
+#   type: 'active_record',
+#   subtype: 'sql',
+#   end_time: Time.current + 1.second,
+#   duration: 1.second,
+#   caller: ["app/models/user.rb:123:in `find_by_email'"]
+# )
+#

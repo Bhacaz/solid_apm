@@ -29,7 +29,7 @@ class Middleware
         SpanSubscriber::Base.spans.each do |span|
           span[:transaction_id] = transaction.id
         end
-        Span.insert_all SpanSubscriber::Base.spans
+        SolidApm::Span.insert_all SpanSubscriber::Base.spans
       end
       SpanSubscriber::Base.spans = nil
     end

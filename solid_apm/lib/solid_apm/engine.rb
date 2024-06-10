@@ -7,10 +7,13 @@ module SolidApm
     config.app_middleware.use Middleware
     # config.before_configuration do
     # end
+    initializer "solid_apm.assets.precompile" do |app|
+      # app.config.assets.precompile += %w( admin.js admin.css )
+      # app.config.assets.precompile += Dir[File.expand_path("../app/assets/javascript", __dir__) + "/**/*.js"]
+      app.config.assets.precompile += %w(solid_apm/application.js)
+    end
 
     config.after_initialize do
-      # Rails.autoloaders.main.eager_load_dir('app/models/span_subscriber')
-
       ActiveSupport::Notifications.subscribe("start_processing.action_controller") do |name, start, finish, id, payload|
         SpanSubscriber::Base.transaction = Transaction.new(
           uuid: SecureRandom.uuid,

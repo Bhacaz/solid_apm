@@ -84,6 +84,6 @@ ActiveRecord::Schema[7.1].define(version: 2024_06_10_003217) do
     t.index ["uuid"], name: "index_transactions_on_uuid", unique: true
   end
 
-  add_foreign_key "solid_apm_spans", "transactions"
+  add_foreign_key "solid_apm_spans", "solid_apm_transactions", column: "transaction_id"
   add_foreign_key "spans", "transactions"
 end

@@ -6,7 +6,8 @@
   <%= csp_meta_tag %>
 
   <%= stylesheet_link_tag    "solid_apm/application", media: "all" %>
-  <script type="module" src="https://unpkg.com/@hotwired/stimulus/dist/stimulus.js"></script>
+  <%= javascript_include_tag "solid_apm/application", "data-turoblinks-track": "reload", type: "module" %>
+
   <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@1.0.1/css/bulma.min.css">
 </head>
