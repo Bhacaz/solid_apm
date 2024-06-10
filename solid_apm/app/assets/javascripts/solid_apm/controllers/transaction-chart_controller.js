@@ -1,6 +1,6 @@
-import {Controller} from "@hotwired/stimulus"
-import ApexCharts from 'apexcharts'
-
+import {
+  Controller,
+} from "https://unpkg.com/@hotwired/stimulus/dist/stimulus.js";
 // unload chart https://github.com/Deanout/weight_tracker/blob/d4123acb952d91fcc9bedb96bbd786088a71482a/app/javascript/controllers/weights_controller.js#L4
 // tooltip: {
 //   y: {
@@ -11,8 +11,10 @@ import ApexCharts from 'apexcharts'
 // }
 
 // Connects to data-controller="transaction-chart"
-export default class extends Controller {
+window.Stimulus.register('transaction-chart',
+  class extends Controller {
   connect() {
+    console.log('Connected')
     var options = {
       chart: {
         type: 'bar',
@@ -32,7 +34,7 @@ export default class extends Controller {
         }
       }
     }
-    fetch('/transactions.json')
+    fetch('/solid_apm/transactions.json')
       .then(response => response.json())
       .then(data => {
         const transformedData = []
@@ -52,4 +54,4 @@ export default class extends Controller {
       this.chart = null;
     }
   }
-}
+})

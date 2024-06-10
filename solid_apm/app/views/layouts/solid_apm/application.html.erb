@@ -5,11 +5,12 @@
   <%= csrf_meta_tags %>
   <%= csp_meta_tag %>
 
-  <%= stylesheet_link_tag    "solid_apm/application", media: "all" %>
-  <%= javascript_include_tag "solid_apm/application", "data-turoblinks-track": "reload", type: "module" %>
-
   <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@1.0.1/css/bulma.min.css">
+  <%= stylesheet_link_tag    "solid_apm/application", media: "all" %>
+  <%= javascript_include_tag "solid_apm/application", "data-turoblinks-track": "reload", type: "module" %>
+  <%= javascript_include_tag "solid_apm/controllers/transaction-chart_controller", "data-turoblinks-track": "reload", type: "module" %>
+  <%= javascript_include_tag "solid_apm/controllers/spans-chart_controller", "data-turoblinks-track": "reload", type: "module" %>
 </head>
 
 <body style="overflow: scroll">

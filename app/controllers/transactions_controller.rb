@@ -2,7 +2,7 @@
 
 class TransactionsController < ApplicationController
   def index
-    @transactions = Transaction.all.order(timestamp: :desc).limit(10)
+    @transactions = SolidApm::Transaction.all.order(timestamp: :desc).limit(10)
 
     # uri = URI('https://dog-api.kinduff.com/api/facts')
     # response = Net::HTTP.get(uri)

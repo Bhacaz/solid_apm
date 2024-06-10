@@ -1,11 +1,14 @@
-import { Controller } from "@hotwired/stimulus"
-import ApexCharts from 'apexcharts'
+import {
+  Controller,
+} from "https://unpkg.com/@hotwired/stimulus/dist/stimulus.js";
 
 // Connects to data-controller="spans-charts"
-export default class extends Controller {
+window.Stimulus.register('spans-chart',
+  class extends Controller {
   static values = { id: String }
 
   connect() {
+    console.log("Connected")
     const options = {
       series: [
         {
@@ -91,4 +94,4 @@ export default class extends Controller {
     num = Math.round(num + "e" + decimalPlaces);
     return Number(num + "e" + -decimalPlaces);
   }
-}
+})
