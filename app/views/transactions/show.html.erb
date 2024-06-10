@@ -1,8 +1,0 @@
-
-<h1 class="title"><%= @transaction.name %></h1>
-<h2 class="title is-6"><span class="has-text-grey-dark">Trace ID:</span> <%= @transaction.uuid %></h2>
-<h2 class="title is-6"><span class="has-text-grey-dark">Timestamp:</span> <%= @transaction.timestamp %></h2>
-<h2 class="title is-6"><span class="has-text-grey-dark">Duration:</span> <%= @transaction.duration %> ms</h2>
-<h2 class="title is-6"><span class="has-text-grey-dark">Metadata:</span> <%= @transaction.metadata %></h2>
-
-<%= render template: 'spans/index', collection: @transaction.spans, locals: { spans: @transaction.spans } %>
