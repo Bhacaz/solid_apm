@@ -1,3 +1,5 @@
+[![Gem Version](https://badge.fury.io/rb/solid_apm.svg)](https://badge.fury.io/rb/solid_apm)
+
 # SolidApm
 Rails engine to manage APM data without using a third party service.
 
