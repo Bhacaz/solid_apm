@@ -34,7 +34,7 @@ window.Stimulus.register('transaction-chart',
         }
       }
     }
-    fetch('/solid_apm/transactions.json')
+    fetch('transactions.json')
       .then(response => response.json())
       .then(data => {
         const transformedData = []

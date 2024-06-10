@@ -4,10 +4,4 @@ SolidApm::Engine.routes.draw do
   get 'transactions', to: 'transactions#index'
   get 'transactions/:id', to: 'transactions#show', as: 'transaction'
   get 'transactions/:id/spans', to: 'transactions#spans', as: 'transaction_spans'
-
-  # resources :transactions, only: %i[index show] do
-  #   member do
-  #     get :spans
-  #   end
-  # end
 end

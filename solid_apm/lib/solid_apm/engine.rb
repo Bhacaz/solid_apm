@@ -6,6 +6,10 @@ module SolidApm
 
     config.app_middleware.use Middleware
 
+    initializer "solid_apm.assets.precompile" do |app|
+      app.config.assets.precompile += %w( application.css application.js )
+    end
+
     config.after_initialize do
       ActiveSupport::Notifications.subscribe("start_processing.action_controller") do |name, start, finish, id, payload|
         SpanSubscriber::Base.transaction = Transaction.new(
