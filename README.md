@@ -69,8 +69,7 @@ Contribution directions go here.
 ## Release
 
 ```shell
-gem bump -v minor
-git push
+gem bump -tp -v minor
 ```
 
 ## License
