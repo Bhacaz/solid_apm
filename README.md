@@ -56,6 +56,7 @@ end
 ### Features
 
 - [ ] Better handle subscribing to ActiveSupport notifications
+- [ ] Custom events
 
 ### Interface
 
@@ -64,6 +65,13 @@ end
 
 ## Contributing
 Contribution directions go here.
+
+## Release
+
+```shell
+gem bump -v minor
+git push
+```
 
 ## License
 The gem is available as open source under the terms of the [MIT License](https://opensource.org/licenses/MIT).

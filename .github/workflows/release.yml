@@ -1,21 +1,34 @@
-# .github/workflows/push_gem.yml
-jobs:
+# .github/workflows/publish-release.yml
+name: Publish release
+on:
   push:
+    tags:
+      - "v*"
+jobs:
+  github_release:
+    name: Publish release
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Publish release
+        uses: ghalactic/github-release-from-tag@v5
+        with:
+          generateReleaseNotes: "true"
+          summaryEnabled: "false"
+  rubygems_publish:
     name: Push gem to RubyGems.org
     runs-on: ubuntu-latest
-
     permissions:
       id-token: write # IMPORTANT: this permission is mandatory for trusted publishing
       contents: write # IMPORTANT: this permission is required for `rake release` to push the release tag
-
     steps:
-      # Set up
       - uses: actions/checkout@v4
       - name: Set up Ruby
         uses: ruby/setup-ruby@v1
         with:
           bundler-cache: true
           ruby-version: ruby
-
-      # Release
       - uses: rubygems/release-gem@v1
