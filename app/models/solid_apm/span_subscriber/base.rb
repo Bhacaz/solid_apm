@@ -7,6 +7,7 @@ module SolidApm
       class_attribute :subscribers, default: Set.new
       thread_cattr_accessor :transaction
       thread_cattr_accessor :spans
+      thread_cattr_accessor :context
 
       def self.inherited(subclass)
         subscribers << subclass

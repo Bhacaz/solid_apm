@@ -38,19 +38,26 @@ DATABASE=solid_apm bin/rails solid_apm:install:migrations
 
 Go to `http://localhost:3000/solid_apm` and start monitoring your application.
 
+Add context
+
+```ruby
+class ApplicationController
+  before_action do
+    SolidApm.set_context(user_id: current_user&.id)
+  end
+end
+```
+
 ## TODOs
 
 ### Features
 
-- [ ] Ignore `/solid_apm` requests
 - [ ] Better handle subscribing to ActiveSupport notifications
-- [ ] Add methods to add context to the transaction (i.e. `SolidApm.add_context(user_id: 1)`)
 
 ### Interface
 
 - [ ] Paginate transactions list
 - [ ] Allow date range transactions index
-- [ ] Display transaction as aggregated data with avg latency, tpm and impact (Relative Avg. duration * transactions per minute)
 
 ## Contributing
 Contribution directions go here.
