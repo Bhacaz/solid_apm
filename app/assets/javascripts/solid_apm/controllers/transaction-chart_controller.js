@@ -37,7 +37,7 @@ window.Stimulus.register('transaction-chart',
       }
     }
 
-    let path = 'transactions/count_by_minutes'
+    let path = window.location.pathname.includes('transactions') ? 'count_by_minutes' : 'transactions/count_by_minutes';
     if (this.nameValue) {
       path = path + "?name=" + encodeURIComponent(this.nameValue);
     }
