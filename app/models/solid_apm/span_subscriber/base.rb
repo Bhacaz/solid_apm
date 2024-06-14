@@ -29,7 +29,6 @@ module SolidApm
             timestamp: start,
             end_time: finish,
             duration: duration,
-            unix_minute: start.to_i / 60,
             name: name,
             type: type,
             subtype: subtype,

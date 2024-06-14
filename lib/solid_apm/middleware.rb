@@ -7,10 +7,10 @@ module SolidApm
     end
 
     def call(env)
-      transaction = SpanSubscriber::Base.transaction
+      self.class.init_transaction
+      status, headers, body = @app.call(env)
 
-      # Skip if the transaction is not from SolidApm
-      if transaction && !transaction.name.start_with?('SolidApm::')
+        puts "#{__FILE__}:#{__LINE__}\n"
         env['rack.after_reply'] ||= []
         env['rack.after_reply'] << ->() do
           self.class.call
@@ -18,14 +18,16 @@ module SolidApm
           Rails.logger.error e
           Rails.logger.error e.backtrace&.join("\n")
         end
-      end
-
-      @app.call(env)
+      [status, headers, body]
     end
 
     def self.call
       transaction = SpanSubscriber::Base.transaction
       SpanSubscriber::Base.transaction = nil
+      if transaction.nil? || transaction.name.start_with?('SolidApm::')
+        SpanSubscriber::Base.spans = nil
+        return
+      end
 
       ApplicationRecord.transaction do
         transaction.save!
@@ -36,6 +38,18 @@ module SolidApm
         SolidApm::Span.insert_all SpanSubscriber::Base.spans
       end
       SpanSubscriber::Base.spans = nil
+    end
+
+    def self.init_transaction
+      now = Time.zone.now
+      SpanSubscriber::Base.transaction = Transaction.new(
+        uuid: SecureRandom.uuid,
+        timestamp: now,
+        unix_minute: (now.to_f / 60).to_i,
+        type: 'request'
+      )
+      SpanSubscriber::Base.spans = []
+      SpanSubscriber::Base.transaction
     end
   end
 end
