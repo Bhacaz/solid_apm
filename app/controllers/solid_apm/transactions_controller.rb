@@ -2,7 +2,7 @@
 
 module SolidApm
   class TransactionsController < ApplicationController
-    TransactionAggregation = Struct.new(:name, :tmp, :latency, :impact)
+    TransactionAggregation = Struct.new(:name, :tmp, :latency, :percentile_95, :impact)
 
     def index
       @aggregated_transactions = Transaction.where(created_at: 1.hour.ago..).group_by(&:name)
@@ -10,10 +10,12 @@ module SolidApm
         latency = transactions.map(&:duration).sum / transactions.size
         tmp = transactions.size.to_f / 60
         impact = latency * tmp
+        percentile_95 = transactions[transactions.size * 0.95].duration
         TransactionAggregation.new(
           transactions.first.name,
           tmp,
           latency,
+          percentile_95,
           impact
         )
       end

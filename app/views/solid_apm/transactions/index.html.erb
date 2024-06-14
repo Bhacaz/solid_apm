@@ -9,6 +9,7 @@
       <th>Name</th>
       <th>Latency</th>
       <th>tmp</th>
+      <th>95p</th>
       <th>Impact</th>
     </tr>
   </thead>
@@ -18,6 +19,7 @@
       <td><%= link_to name, transaction_by_name_path(name) %></td>
       <td><%= aggregation.latency.round(2) %> ms</td>
       <td><%= aggregation.tmp.round(2) %></td>
+      <td><%= aggregation.percentile_95.round(2) %> ms</td>
       <td>
         <progress class="progress is-warning" value="<%= aggregation.impact %>" max="100"></progress>
       </td>
