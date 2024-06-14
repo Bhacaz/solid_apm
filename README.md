@@ -69,7 +69,9 @@ Contribution directions go here.
 ## Release
 
 ```shell
-gem bump -tp -v minor
+gem bump -v minor
+bundle install && git add . && git commit --amend --no-edit
+gem tag -p
 ```
 
 ## License
