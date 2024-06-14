@@ -3,27 +3,22 @@
 <h2 class="title is-4 has-text-grey">Last hour</h2>
 <div data-controller="transaction-chart"></div>
 
-<table class="table">
+<table class="table is-fullwidth">
   <thead>
     <tr>
-      <% SolidApm::Transaction.attribute_names.each do |attribute| %>
-        <% next if attribute.to_s.end_with?('_at') %>
-        <th scope="col"><%= attribute.humanize %></th>
-      <% end %>
+      <th>Name</th>
+      <th>Latency</th>
+      <th>tmp</th>
+      <th>Impact</th>
     </tr>
   </thead>
-  <tbody>
-  <% @transactions.each do |transaction| %>
+
+  <% @aggregated_transactions.each do |name, aggregation| %>
     <tr>
-      <% transaction.attributes.each do |attribute| %>
-        <% next if attribute[0].to_s.end_with?('_at') %>
-        <% if attribute[0] == 'uuid' %>
-          <td><%= link_to attribute[1], transaction %></td>
-        <% else %>
-          <td><%= attribute[1] %></td>
-        <% end %>
-      <% end %>
+      <td><%= link_to name, transaction_by_name_path(name) %></td>
+      <td><%= aggregation.latency.round(2) %> ms</td>
+      <td><%= aggregation.tmp.round(2) %></td>
+      <td><%= aggregation.impact %></td>
     </tr>
   <% end %>
-  </tbody>
 </table>

@@ -10,7 +10,6 @@ module SolidApm
       self.class.init_transaction
       status, headers, body = @app.call(env)
 
-        puts "#{__FILE__}:#{__LINE__}\n"
         env['rack.after_reply'] ||= []
         env['rack.after_reply'] << ->() do
           self.class.call

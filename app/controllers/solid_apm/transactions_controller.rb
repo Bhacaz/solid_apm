@@ -2,21 +2,35 @@
 
 module SolidApm
   class TransactionsController < ApplicationController
+    TransactionAggregation = Struct.new(:name, :tmp, :latency, :impact)
+
     def index
-      @transactions = Transaction.all.order(timestamp: :desc).limit(10)
-
-      # uri = URI('https://dog-api.kinduff.com/api/facts')
-      # response = Net::HTTP.get(uri)
-      # @dog_fact = JSON.parse(response)
-      #
-      # Rails.cache.fetch('dog_fact', expires_in: 1.minutes) do
-      #   'This is a dog fact!'
-      # end
-
-      respond_to do |format|
-        format.html
-        format.json { render json: transactions_count_by_minutes }
+      @aggregated_transactions = Transaction.where(created_at: 1.hour.ago..).group_by(&:name)
+      @aggregated_transactions.transform_values! do |transactions|
+        latency = transactions.map(&:duration).sum / transactions.size
+        tmp = transactions.size.to_f / 60
+        impact = latency * tmp
+        TransactionAggregation.new(
+          transactions.first.name,
+          tmp,
+          latency,
+          impact
+        )
       end
+      # Find the maximum and minimum impact values
+      max_impact = @aggregated_transactions.values.max_by(&:impact).impact
+      min_impact = @aggregated_transactions.values.min_by(&:impact).impact
+
+      # Normalize impact 0-100
+      @aggregated_transactions.each do |_, aggregation|
+        normalized_impact = ((aggregation.impact - min_impact) / (max_impact - min_impact)) * 100
+        aggregation.impact = normalized_impact.to_i
+      end
+      @aggregated_transactions = @aggregated_transactions.sort_by { |_, v| -v.impact }.to_h
+    end
+
+    def show_by_name
+      @transactions = Transaction.where(name: params[:name]).order(timestamp: :desc).limit(20)
     end
 
     def show
@@ -29,13 +43,16 @@ module SolidApm
       render json: @spans
     end
 
-    private
-
-    def transactions_count_by_minutes
-      Transaction.all.order(timestamp: :desc)
+    def count_by_minutes
+      scope = Transaction.all.order(timestamp: :desc)
                  .where(created_at: 1.hour.ago..)
-                 .group_by { |t| t.created_at.beginning_of_minute }
-                 .transform_values!(&:count)
+
+      if params[:name].present?
+        scope = scope.where(name: params[:name])
+      end
+
+      render json: scope.group_by { |t| t.created_at.beginning_of_minute }
+           .transform_values!(&:count)
     end
   end
 end

@@ -13,7 +13,9 @@ import {
 // Connects to data-controller="transaction-chart"
 window.Stimulus.register('transaction-chart',
   class extends Controller {
-  connect() {
+    static values = { name: String }
+
+    connect() {
     console.log('Connected')
     var options = {
       chart: {
@@ -34,7 +36,13 @@ window.Stimulus.register('transaction-chart',
         }
       }
     }
-    fetch('transactions.json')
+
+    let path = 'transactions/count_by_minutes'
+    if (this.nameValue) {
+      path = path + "?name=" + encodeURIComponent(this.nameValue);
+    }
+
+    fetch(path)
       .then(response => response.json())
       .then(data => {
         const transformedData = []
