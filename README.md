@@ -3,9 +3,8 @@
 # SolidApm
 Rails engine to manage APM data without using a third party service.
 
-<img src="https://github.com/Bhacaz/solid_apm/assets/7858787/b83a4768-dbff-4c1c-8972-4b9db1092c99" width="400px">
-<img src="https://github.com/Bhacaz/solid_apm/assets/7858787/87696866-1fb3-46d6-91ae-0137cc7da578" width="400px">
-
+<img src="./docs/img.png" width="400px">
+<img src="./docs/img_1.png" width="400px">
 
 ## Installation
 
@@ -22,6 +21,10 @@ Rails.application.routes.draw do
   mount SolidApm::Engine => "/solid_apm"
 end
 ```
+
+Routing constraint can be use to authorize access. 
+See [Routing constraint](https://guides.rubyonrails.org/routing.html#advanced-constraints)
+for more information.
 
 Configure the database connection:
 ```ruby
