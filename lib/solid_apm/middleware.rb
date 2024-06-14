@@ -1,18 +1,23 @@
 # frozen_string_literal: true
 
 module SolidApm
-class Middleware
+  class Middleware
     def initialize(app)
       @app = app
     end
 
     def call(env)
-      env['rack.after_reply'] ||= []
-      env['rack.after_reply'] << ->() do
-        self.class.call
-      rescue StandardError => e
-        Rails.logger.error e
-        Rails.logger.error e.backtrace&.join("\n")
+      transaction = SpanSubscriber::Base.transaction
+
+      # Skip if the transaction is not from SolidApm
+      if transaction && !transaction.name.start_with?('SolidApm::')
+        env['rack.after_reply'] ||= []
+        env['rack.after_reply'] << ->() do
+          self.class.call
+        rescue StandardError => e
+          Rails.logger.error e
+          Rails.logger.error e.backtrace&.join("\n")
+        end
       end
 
       @app.call(env)
@@ -20,9 +25,8 @@ class Middleware
 
     def self.call
       transaction = SpanSubscriber::Base.transaction
-      return unless transaction
-
       SpanSubscriber::Base.transaction = nil
+
       ApplicationRecord.transaction do
         transaction.save!
 
