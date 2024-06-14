@@ -18,6 +18,7 @@ jobs:
         with:
           generateReleaseNotes: "true"
           summaryEnabled: "false"
+          prerelease: "false"
   rubygems_publish:
     name: Push gem to RubyGems.org
     runs-on: ubuntu-latest

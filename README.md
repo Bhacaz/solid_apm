@@ -3,8 +3,8 @@
 # SolidApm
 Rails engine to manage APM data without using a third party service.
 
-<img src="./docs/img.png" width="400px">
-<img src="./docs/img_1.png" width="400px">
+<img src="./docs/img.png" width="600px">
+<img src="./docs/img_1.png" width="600px">
 
 ## Installation
 
@@ -70,7 +70,7 @@ Contribution directions go here.
 
 ```shell
 gem bump -v minor
-bundle install && git add . && git commit --amend --no-edit
+bundle install && git add Gemfile.lock && git commit --amend --no-edit && git push
 gem tag -p
 ```
 
