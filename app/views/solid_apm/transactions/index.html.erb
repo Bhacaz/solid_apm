@@ -1,21 +1,22 @@
 <h1 class="title">Transactions</h1>
 
-<%= form_with path: transactions_path do |f| %>
+<%= form_with path: transactions_path, method: :get do |f| %>
   <div class="is-flex is-flex-direction-row is-justify-content-center is-align-items-center" style="gap: 1em">
     <%= f.label 'From' %>
-    <%= f.number_field :start, value: 60, min: 1, class: 'input', style: 'width: 6em' %>
+    <%= f.number_field :from_value, value: params[:from_value] || 60, min: 1, class: 'input', style: 'width: 6em' %>
     <div class="select">
-      <%= f.select :start_unit, {
+      <%= f.select :from_unit, {
         "minutes" => "minutes",
         "hours" => "hours",
         "days" => "days",
         "weeks" => "weeks",
         "months" => "months",
         "years" => "years"
-      } %>
+      }, {selected: params[:from_unit] || 'minutes' } %>
     </div>
+    <span class="has-text-white-ter">ago</span>
     <b>→</b>
-    <%= f.label 'To: Now' %>
+    <span class="has-text-white-ter">now</span>
     <%= f.submit 'Apply', class: 'button' %>
   </div>
 <% end %>
