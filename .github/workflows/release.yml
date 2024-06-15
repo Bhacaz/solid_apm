@@ -33,3 +33,5 @@ jobs:
           bundler-cache: true
           ruby-version: ruby
       - uses: rubygems/release-gem@v1
+        with:
+          await-release: false

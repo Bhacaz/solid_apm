@@ -1,0 +1,48 @@
+#!/usr/bin/env ruby
+# frozen_string_literal: true
+
+SEM = %w(majot minor patch)
+
+# raise if git not clean
+raise 'Git is not clean' unless system('git', 'diff', '--quiet')
+
+sem = ARGV[0]
+
+if sem.nil? || !SEM.include?(sem)
+  puts "Please provide a valid semver: #{SEM.join(', ')}"
+  exit 1
+end
+
+File.read('lib/solid_apm/version.rb').match(/VERSION = \W(\d+\.\d+\.\d+)\W/)
+current_version = Regexp.last_match(1)
+
+major, minor, patch = current_version.split('.').map(&:to_i)
+
+case sem
+when 'major'
+  major += 1
+  minor = 0
+  patch = 0
+when 'minor'
+  minor += 1
+  patch = 0
+when 'patch'
+  patch += 1
+end
+
+new_version = "#{major}.#{minor}.#{patch}"
+
+File.write('lib/solid_apm/version.rb', "VERSION = '#{new_version}'\n")
+
+puts "Bumped version from #{current_version} to #{new_version}"
+
+system('bundle', 'install')
+system('git', 'add', '.')
+system('git', 'commit', '-m', "Bump to #{new_version}")
+
+# create tag
+
+system('git', 'tag', "v#{new_version}")
+
+system('git', 'push')
+system('git', 'push', '--tags')

@@ -69,9 +69,8 @@ Contribution directions go here.
 ## Release
 
 ```shell
-gem bump -v minor
-bundle install && git add Gemfile.lock && git commit --amend --no-edit && git push
-gem tag -p
+bin/bump major|minor|patch
+# GitHub Actions will take care of the rest
 ```
 
 ## License
