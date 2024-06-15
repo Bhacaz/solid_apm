@@ -13,7 +13,8 @@ if sem.nil? || !SEM.include?(sem)
   exit 1
 end
 
-File.read('lib/solid_apm/version.rb').match(/VERSION = \W(\d+\.\d+\.\d+)\W/)
+current_version_file_content = File.read('lib/solid_apm/version.rb')
+current_version_file_content.match(/VERSION = \W(\d+\.\d+\.\d+)\W/)
 current_version = Regexp.last_match(1)
 
 major, minor, patch = current_version.split('.').map(&:to_i)
@@ -32,11 +33,19 @@ end
 
 new_version = "#{major}.#{minor}.#{patch}"
 
-File.write('lib/solid_apm/version.rb', "VERSION = '#{new_version}'\n")
+File.open('lib/solid_apm/version.rb', 'w') do |file|
+  file.write(current_version_file_content.gsub(current_version, new_version))
+end
 
 puts "Bumped version from #{current_version} to #{new_version}"
 
+begin
 system('bundle', 'install')
+rescue
+  puts 'Failed to run bundle install'
+  exit 1
+end
+
 system('git', 'add', '.')
 system('git', 'commit', '-m', "Bump to #{new_version}")
 
@@ -44,5 +53,5 @@ system('git', 'commit', '-m', "Bump to #{new_version}")
 
 system('git', 'tag', "v#{new_version}")
 
-system('git', 'push')
-system('git', 'push', '--tags')
+# system('git', 'push')
+# system('git', 'push', '--tags')
