@@ -28,6 +28,9 @@ window.Stimulus.register('transaction-chart',
       xaxis: {
         type: 'datetime'
       },
+      dataLabels: {
+        enabled: false
+      },
       tooltip: {
         x: {
           formatter: function (value) {
@@ -38,8 +41,15 @@ window.Stimulus.register('transaction-chart',
     }
 
     let path = window.location.pathname.includes('transactions') ? 'count_by_minutes' : 'transactions/count_by_minutes';
+    path = path + "?";
     if (this.nameValue) {
-      path = path + "?name=" + encodeURIComponent(this.nameValue);
+      path = path + "name=" + encodeURIComponent(this.nameValue);
+    }
+
+    const fromValue = document.querySelector('input[name="from_value"]').value
+    const fromUnit = document.querySelector('select[name="from_unit"]').value;
+    if (fromValue && fromUnit) {
+      path = path + "&from_value=" + fromValue + "&from_unit=" + fromUnit;
     }
 
     fetch(path)
