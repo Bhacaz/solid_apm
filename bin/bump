@@ -40,18 +40,15 @@ end
 puts "Bumped version from #{current_version} to #{new_version}"
 
 begin
-system('bundle', 'install')
-rescue
-  puts 'Failed to run bundle install'
+  system('bundle', 'install')
+
+  system('git', 'add', '.')
+  system('git', 'commit', '-m', "Bump to v#{new_version}")
+  system('git', 'tag', '-am', "v#{new_version}", "v#{new_version}")
+
+  system('git', 'push')
+  system('git', 'push', '--tags')
+rescue Exception => e
+  puts 'Failed: ' + e.message
   exit 1
 end
-
-system('git', 'add', '.')
-system('git', 'commit', '-m', "Bump to #{new_version}")
-
-# create tag
-
-system('git', 'tag', "v#{new_version}")
-
-# system('git', 'push')
-# system('git', 'push', '--tags')
