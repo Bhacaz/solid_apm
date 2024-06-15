@@ -46,10 +46,10 @@ window.Stimulus.register('transaction-chart',
       path = path + "name=" + encodeURIComponent(this.nameValue);
     }
 
-    const fromValue = document.querySelector('input[name="from_value"]').value
-    const fromUnit = document.querySelector('select[name="from_unit"]').value;
+    const fromValue = document.querySelector('input[name="from_value"]')
+    const fromUnit = document.querySelector('select[name="from_unit"]');
     if (fromValue && fromUnit) {
-      path = path + "&from_value=" + fromValue + "&from_unit=" + fromUnit;
+      path = path + "&from_value=" + fromValue.value + "&from_unit=" + fromUnit.value;
     }
 
     fetch(path)
