@@ -16,7 +16,6 @@ window.Stimulus.register('transaction-chart',
     static values = { name: String }
 
     connect() {
-    console.log('Connected')
     var options = {
       chart: {
         type: 'bar',
@@ -40,8 +39,7 @@ window.Stimulus.register('transaction-chart',
       }
     }
 
-    let path = window.location.pathname.includes('transactions') ? 'count_by_minutes' : 'transactions/count_by_minutes';
-    path = path + "?";
+    let path = "count_time_aggregations?";
     if (this.nameValue) {
       path = path + "name=" + encodeURIComponent(this.nameValue);
     }
@@ -52,6 +50,9 @@ window.Stimulus.register('transaction-chart',
       path = path + "&from_value=" + fromValue.value + "&from_unit=" + fromUnit.value;
     }
 
+    const base = window.location.pathname.split('/transactions')[0];
+    path = base + "/transactions/" + path;
+    path = path.replace("//", "/");
     fetch(path)
       .then(response => response.json())
       .then(data => {

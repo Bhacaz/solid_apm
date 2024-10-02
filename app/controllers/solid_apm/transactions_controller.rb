@@ -46,16 +46,16 @@ module SolidApm
       render json: @spans
     end
 
-    def count_by_minutes
+    def count_time_aggregations
       scope = Transaction.all.order(timestamp: :desc)
                  .where(created_at: from_to_range)
+
 
       if params[:name].present?
         scope = scope.where(name: params[:name])
       end
 
-      render json: scope.group_by { |t| t.created_at.beginning_of_minute }
-           .transform_values!(&:count)
+      render json: aggregate(scope.select(:id, :created_at).find_each, from_to_range, intervals_count: 20).transform_values!(&:count)
     end
 
     private
@@ -66,6 +66,15 @@ module SolidApm
       from = params[:from_value].to_i.public_send(params[:from_unit].to_sym).ago
       to = Time.current
       (from..to)
+    end
+
+    def aggregate(items, range, intervals_count: 20)
+      start_time = range.begin
+      end_time = range.end
+      time_range_in_seconds = (end_time - start_time).to_i
+      time_interval_duration_in_seconds = (time_range_in_seconds / intervals_count.to_f).round
+
+      items.chunk { |item| Time.zone.at((item.created_at.to_i) / time_interval_duration_in_seconds * time_interval_duration_in_seconds, 0) }.to_h
     end
   end
 end
