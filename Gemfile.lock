@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    solid_apm (0.5.0)
+    solid_apm (0.6.0)
       actionpack (>= 7.1)
       actionview (>= 7.1)
       activerecord (>= 7.1)
