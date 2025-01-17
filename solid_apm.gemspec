@@ -18,7 +18,7 @@ Gem::Specification.new do |spec|
     Dir["{app,config,db,lib}/**/*", "LICENSE", "Rakefile", "README.md"]
   end
 
-  "~> 7.1".tap do |rails_version|
+  ">= 7.1".tap do |rails_version|
     spec.add_dependency "actionpack", rails_version
     spec.add_dependency "actionview", rails_version
     spec.add_dependency "activerecord", rails_version

@@ -2,10 +2,10 @@ PATH
   remote: .
   specs:
     solid_apm (0.5.0)
-      actionpack (~> 7.1)
-      actionview (~> 7.1)
-      activerecord (~> 7.1)
-      railties (~> 7.1)
+      actionpack (>= 7.1)
+      actionview (>= 7.1)
+      activerecord (>= 7.1)
+      railties (>= 7.1)
 
 GEM
   remote: https://rubygems.org/
