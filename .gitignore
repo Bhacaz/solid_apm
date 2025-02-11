@@ -6,5 +6,8 @@
 /spec/dummy/db/*.sqlite3
 /spec/dummy/db/*.sqlite3-*
 /spec/dummy/log/*.log
+!/spec/dummy/log/.keep
 /spec/dummy/storage/
+!/spec/dummy/storage/.keep
 /spec/dummy/tmp/
+!/spec/dummy/tmp/.keep
