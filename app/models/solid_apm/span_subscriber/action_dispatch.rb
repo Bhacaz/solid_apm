@@ -14,7 +14,7 @@ module SolidApm
             params: payload[:request].params.except(:controller, :action),
             context: SpanSubscriber::Base.context
           }
-          SpanSubscriber::Base.context = nil
+          SpanSubscriber::Base.context = {}
         end
       end
 
