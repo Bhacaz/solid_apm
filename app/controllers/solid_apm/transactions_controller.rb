@@ -38,6 +38,16 @@ module SolidApm
         aggregation.impact = normalized_impact.to_i || 0
       end
       @aggregated_transactions = @aggregated_transactions.sort_by { |_, v| -v.impact }.to_h
+      @throughput_data = Transaction
+                           .where(created_at: from_to_range)
+                           .group_by_second(:created_at, n: n_intervals_seconds(from_to_range))
+                           .count
+                           .map { |k, v| {x: k, y: v} }
+      @latency_data = Transaction
+                        .where(created_at: from_to_range)
+                        .group_by_second(:created_at, n: n_intervals_seconds(from_to_range))
+                        .average(:duration)
+                        .map { |k, v| {x: k, y: v.to_i} }
     end
 
     def show_by_name
@@ -55,8 +65,7 @@ module SolidApm
     end
 
     def count_time_aggregations
-      scope = Transaction.order(timestamp: :desc)
-                 .where(created_at: from_to_range)
+      scope = Transaction.where(created_at: from_to_range)
 
       if params[:name].present?
         scope = scope.where(name: params[:name])

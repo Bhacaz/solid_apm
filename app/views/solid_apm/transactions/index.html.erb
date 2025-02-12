@@ -29,7 +29,22 @@
     <%= f.submit 'Apply', class: 'button' %>
   </div>
 <% end %>
-<div data-controller="transaction-chart"></div>
+<div class="columns pt-2">
+  <div class="column">
+    <h2 class="ml-4">Throughput</h2>
+    <div data-controller="transaction-chart"
+         data-transaction-chart-name-value="tpm"
+         data-transaction-chart-color-value="#43BCCD"
+         data-transaction-chart-data-value="<%= @throughput_data.to_json %>"></div>
+  </div>
+  <div class="column">
+    <h2 class="ml-4">Latency</h2>
+    <div data-controller="transaction-chart"
+         data-transaction-chart-name-value="ms"
+         data-transaction-chart-color-value="#13d8aa"
+         data-transaction-chart-data-value="<%= @latency_data.to_json %>"></div>
+  </div>
+</div>
 
 <table class="table is-fullwidth">
   <thead>

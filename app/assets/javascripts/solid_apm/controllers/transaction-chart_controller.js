@@ -1,6 +1,4 @@
-import {
-  Controller,
-} from "https://unpkg.com/@hotwired/stimulus/dist/stimulus.js";
+import {Controller,} from "https://unpkg.com/@hotwired/stimulus/dist/stimulus.js";
 // unload chart https://github.com/Deanout/weight_tracker/blob/d4123acb952d91fcc9bedb96bbd786088a71482a/app/javascript/controllers/weights_controller.js#L4
 // tooltip: {
 //   y: {
@@ -11,44 +9,31 @@ import {
 // }
 
 // Connects to data-controller="transaction-chart"
-window.Stimulus.register('transaction-chart',
-  class extends Controller {
-    static values = { name: String }
+window.Stimulus.register('transaction-chart', class extends Controller {
+  static values = {name: String, data: Array, color: String}
 
-    connect() {
+  connect() {
     var options = {
+      colors: [this.colorValue],
       chart: {
-        type: 'area',
-        height: '200em',
-        background: '0',
-        foreColor: '#ffffff77',
-        zoom: {
+        type: 'area', height: '200em', background: '0', foreColor: '#ffffff55', zoom: {
           enabled: false,
-        },
-        toolbar: {
+        }, toolbar: {
           show: false,
         }
-      },
-      series: [{
-        name: 'tpm',
-      }],
-      xaxis: {
+      }, series: [{
+        name: this.nameValue, data: this.dataValue
+      }], xaxis: {
         type: 'datetime'
-      },
-      stroke: {
+      }, stroke: {
         curve: 'smooth'
-      },
-      theme: {
+      }, theme: {
         mode: 'dark',
-      },
-      grid: {
-        show: true,
-        borderColor: '#ffffff77',
-      },
-      dataLabels: {
+      }, grid: {
+        show: true, borderColor: '#ffffff55',
+      }, dataLabels: {
         enabled: false
-      },
-      tooltip: {
+      }, tooltip: {
         x: {
           formatter: function (value) {
             return new Date(value).toLocaleString()
@@ -57,31 +42,8 @@ window.Stimulus.register('transaction-chart',
       }
     }
 
-    let path = "count_time_aggregations?";
-    if (this.nameValue) {
-      path = path + "name=" + encodeURIComponent(this.nameValue);
-    }
-
-    const fromValue = document.querySelector('input[name="from_value"]')
-    const fromUnit = document.querySelector('select[name="from_unit"]');
-    if (fromValue && fromUnit) {
-      path = path + "&from_value=" + fromValue.value + "&from_unit=" + fromUnit.value;
-    }
-
-    const base = window.location.pathname.split('/transactions')[0];
-    path = base + "/transactions/" + path;
-    path = path.replace("//", "/");
-    fetch(path)
-      .then(response => response.json())
-      .then(data => {
-        const transformedData = []
-        for (let [key, value] of Object.entries(data)) {
-          transformedData.push({x: key, y: value})
-        }
-        options.series[0].data = transformedData
-        this.chart = new ApexCharts(this.element, options)
-        this.chart.render()
-      })
+    this.chart = new ApexCharts(this.element, options)
+    this.chart.render()
   }
 
   // Unloads the chart before loading new data.
