@@ -13,7 +13,7 @@
 <div class="is-fullwidth">
   <% @transaction.spans.each do |span| %>
     <% left_percent = ((span.timestamp - min_start_time).to_f / total_duration * 100) %>
-    <% width_percent = ((span.end_time - span.timestamp).to_f / total_duration * 100) %>
+    <% width_percent = [((span.end_time - span.timestamp).to_f / total_duration * 100), 0.1].max %>
     <% right_percent = (100 - left_percent - width_percent) %>
 
     <div style="display: flex; height: 1.5em;">
@@ -22,6 +22,13 @@
       </div>
       <div style="flex: <%= right_percent %>;"></div>
     </div>
-    <div style="margin-left: <%= left_percent %>%" class="mt-1 mb-2"> <%= span.name %> <span class="has-text-grey pl-2"><%= span.duration.round(2) %>ms</span></div>
+    <div style="margin-left: <%= left_percent %>%" class="mt-1 mb-2">
+      <p>
+        <span class="has-text-grey-lighter	"><%= span.name %></span><span class="has-text-grey pl-2"><%= span.duration.round(2) %>ms</span>
+      </p>
+      <p>
+        <%= span.summary %>
+      </p>
+    </div>
   <% end %>
   </div>

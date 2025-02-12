@@ -52,7 +52,7 @@
       </tr>
     </thead>
     <tbody>
-    <% @transactions_scope.find_each do |transaction| %>
+    <% @transactions_scope.order(timestamp: :desc).each do |transaction| %>
       <tr>
         <td><%= link_to transaction.name, transaction_spans_path(uuid: transaction.uuid) %></td>
         <td><%= transaction.timestamp %></td>

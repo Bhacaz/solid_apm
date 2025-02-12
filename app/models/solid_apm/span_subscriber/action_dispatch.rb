@@ -8,8 +8,9 @@ module SolidApm
         super do |name, start, finish, id, payload|
           transaction = SpanSubscriber::Base.transaction
           transaction.name = "#{payload[:request].controller_class}##{payload[:request].path_parameters[:action]}"
+          transaction.timestamp = start
           transaction.end_time = finish
-          transaction.duration = ((transaction.end_time.to_f - transaction.timestamp.to_f) * 1000).round(6)
+          transaction.duration = ((finish.to_f - start.to_f) * 1000).round(6)
           transaction.metadata = {
             params: payload[:request].params.except(:controller, :action),
             context: SpanSubscriber::Base.context
