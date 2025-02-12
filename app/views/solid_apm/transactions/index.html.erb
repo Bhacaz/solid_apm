@@ -54,7 +54,7 @@
     <tbody>
     <% @transactions_scope.find_each do |transaction| %>
       <tr>
-        <td><%= link_to transaction.name, transaction_spans_path(transaction) %></td>
+        <td><%= link_to transaction.name, transaction_spans_path(uuid: transaction.uuid) %></td>
         <td><%= transaction.timestamp %></td>
         <td><%= transaction.type %></td>
         <td><%= transaction.duration.round(2) %></td>

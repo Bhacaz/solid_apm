@@ -55,29 +55,9 @@ module SolidApm
       @latency_data = scope.median(:duration).transform_values(&:to_i)
     end
 
-    def show_by_name
-      @transactions = Transaction.where(name: params[:name]).order(timestamp: :desc).limit(20)
-    end
-
-    def show
-      @transaction = Transaction.find(params[:id])
-    end
-
     def spans
-      @transaction = Transaction.find(params[:id])
+      @transaction = Transaction.find_by!(uuid: params[:uuid])
       @spans = @transaction.spans
-      render json: @spans
-    end
-
-    def count_time_aggregations
-      scope = Transaction.where(created_at: from_to_range)
-
-      if params[:name].present?
-        scope = scope.where(name: params[:name])
-      end
-
-      # Maybe only extract what I need from Groupdate so I dont depend on it.
-      render json: scope.group_by_second(:created_at, n: n_intervals_seconds(from_to_range)).count
     end
 
     private
