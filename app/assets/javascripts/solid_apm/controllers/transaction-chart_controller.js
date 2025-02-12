@@ -18,14 +18,32 @@ window.Stimulus.register('transaction-chart',
     connect() {
     var options = {
       chart: {
-        type: 'bar',
-        height: '200em'
+        type: 'area',
+        height: '200em',
+        background: '0',
+        foreColor: '#ffffff77',
+        zoom: {
+          enabled: false,
+        },
+        toolbar: {
+          show: false,
+        }
       },
       series: [{
         name: 'tpm',
       }],
       xaxis: {
         type: 'datetime'
+      },
+      stroke: {
+        curve: 'smooth'
+      },
+      theme: {
+        mode: 'dark',
+      },
+      grid: {
+        show: true,
+        borderColor: '#ffffff77',
       },
       dataLabels: {
         enabled: false

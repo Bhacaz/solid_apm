@@ -78,7 +78,7 @@ module SolidApm
       (from..to)
     end
 
-    def n_intervals_seconds(range, intervals_count: 20)
+    def n_intervals_seconds(range, intervals_count: 30)
       start_time = range.begin
       end_time = range.end
       time_range_in_seconds = (end_time - start_time).to_i
