@@ -12,11 +12,14 @@ module SolidApm
         return
       end
 
-      transactions_scope = Transaction.where(created_at: from_to_range)
-      transaction_names = transactions_scope.distinct.pluck(:name)
-      latency_95p = transactions_scope.group(:name).percentile(:duration, 0.95)
-      latency_median = transactions_scope.group(:name).median(:duration)
-      tmp_dict = transactions_scope.group(:name).group_by_minute(:created_at, series: false).count.each_with_object({}) do |(k, v), h|
+      @transactions_scope = Transaction.where(created_at: from_to_range)
+      if params[:name].present?
+        @transactions_scope = @transactions_scope.where(name: params[:name])
+      end
+      transaction_names = @transactions_scope.distinct.pluck(:name)
+      latency_95p = @transactions_scope.group(:name).percentile(:duration, 0.95)
+      latency_median = @transactions_scope.group(:name).median(:duration)
+      tmp_dict = @transactions_scope.group(:name).group_by_minute(:created_at, series: false).count.each_with_object({}) do |(k, v), h|
         current_value = h[k.first] ||= 0
         h[k.first] = v if v > current_value
       end
@@ -47,7 +50,7 @@ module SolidApm
       end
       @aggregated_transactions = @aggregated_transactions.sort_by { |_, v| -v.impact }.to_h
 
-      scope = transactions_scope.group_by_second(:created_at, n: n_intervals_seconds(from_to_range))
+      scope = @transactions_scope.group_by_second(:created_at, n: n_intervals_seconds(from_to_range))
       @throughput_data = scope.count
       @latency_data = scope.median(:duration).transform_values(&:to_i)
     end

@@ -1,44 +1,15 @@
-<h1 class="title">Solid APM</h1>
-
-<%= form_with path: transactions_path, method: :get do |f| %>
-  <div class="is-flex is-flex-direction-row is-justify-content-center is-align-items-center" style="gap: 1em">
-    <%= f.number_field :from_value, value: params[:from_value] || 60, min: 1, class: 'input', style: 'width: 6em' %>
-    <div class="select">
-      <%= f.select :from_unit, {
-        "minutes" => "minutes",
-        "hours" => "hours",
-        "days" => "days",
-        "weeks" => "weeks",
-        "months" => "months",
-        "years" => "years"
-      }, {selected: params[:from_unit] || 'minutes' } %>
-    </div>
-    <b>→</b>
-    <%= f.number_field :to_value, value: params[:to_value] || 1, min: 1, class: 'input', style: 'width: 6em' %>
-    <div class="select">
-      <%= f.select :to_unit, {
-        "seconds" => "seconds",
-        "minutes" => "minutes",
-        "hours" => "hours",
-        "days" => "days",
-        "weeks" => "weeks",
-        "months" => "months",
-        "years" => "years"
-      }, {selected: params[:to_unit] || 'seconds' } %>
-    </div>
-    <%= f.submit 'Apply', class: 'button' %>
-  </div>
+<% if params[:name] %>
+  <h1 class="title"><%= link_to '⬅ ', transactions_path(
+    from_value: params[:from_value],
+    from_unit: params[:from_unit],
+    to_value: params[:to_value],
+    to_unit: params[:to_unit]) %><%= params[:name] %></h1>
+<% else %>
+  <h1 class="title">Solid APM</h1>
 <% end %>
-<div class="columns pt-2" style="height: 16em">
-  <div class="column">
-    <h2 class="ml-4">Throughput</h2>
-    <%= area_chart({ name: 'tmp', data: @throughput_data }, area_chart_options.merge(colors: ['#43BCCD'])) %>
-  </div>
-  <div class="column">
-    <h2 class="ml-4">Latency</h2>
-    <%= area_chart({ name: 'ms', data: @latency_data }, area_chart_options.merge(colors: ['#13d8aa'])) %>
-  </div>
-</div>
+
+<%= render 'time_range_form' %>
+<%= render 'charts' %>
 
 <table class="table is-fullwidth">
   <thead>
@@ -53,7 +24,12 @@
 
   <% @aggregated_transactions.each do |name, aggregation| %>
     <tr>
-      <td><%= link_to name, transaction_by_name_path(name) %></td>
+      <td><%= link_to name, transactions_path(
+        from_value: params[:from_value],
+        from_unit: params[:from_unit],
+        to_value: params[:to_value],
+        to_unit: params[:to_unit],
+        name: name) %>
       <td><%= aggregation.latency.round(2) %> ms</td>
       <td><%= aggregation.tmp.round(2) %></td>
       <td><%= aggregation.percentile_95.round(2) %> ms</td>
@@ -63,3 +39,28 @@
     </tr>
   <% end %>
 </table>
+
+<% if params[:name] %>
+  <table class="table is-fullwidth is-hoverable">
+    <thead>
+      <tr>
+        <th scope="col">Name</th>
+        <th scope="col">Timestamp</th>
+        <th scope="col">Type</th>
+        <th scope="col">Duration</th>
+        <th scope="col">Metadata</th>
+      </tr>
+    </thead>
+    <tbody>
+    <% @transactions_scope.find_each do |transaction| %>
+      <tr>
+        <td><%= link_to transaction.name, transaction_spans_path(transaction) %></td>
+        <td><%= transaction.timestamp %></td>
+        <td><%= transaction.type %></td>
+        <td><%= transaction.duration.round(2) %></td>
+        <td><%= transaction.metadata %></td>
+      </tr>
+    <% end %>
+    </tbody>
+  </table>
+<% end %>
