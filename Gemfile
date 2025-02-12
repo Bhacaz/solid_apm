@@ -5,7 +5,9 @@ gemspec
 
 gem "puma"
 
-gem "sqlite3", "~> 1.4"
+gem 'rails'
+
+gem "sqlite3"
 
 gem "propshaft"
 gem 'benchmark'
