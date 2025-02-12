@@ -1,3 +1,4 @@
+require 'groupdate'
 require "solid_apm/version"
 require "solid_apm/engine"
 

@@ -4,7 +4,9 @@ PATH
     solid_apm (0.6.0)
       actionpack (>= 7.1)
       actionview (>= 7.1)
+      active_median
       activerecord (>= 7.1)
+      groupdate
       railties (>= 7.1)
 
 GEM
@@ -53,6 +55,8 @@ GEM
       erubi (~> 1.11)
       rails-dom-testing (~> 2.2)
       rails-html-sanitizer (~> 1.6)
+    active_median (0.5.0)
+      activesupport (>= 7)
     activejob (8.0.1)
       activesupport (= 8.0.1)
       globalid (>= 0.3.6)
@@ -94,6 +98,8 @@ GEM
     erubi (1.13.1)
     globalid (1.2.1)
       activesupport (>= 6.1)
+    groupdate (6.5.1)
+      activesupport (>= 7)
     i18n (1.14.7)
       concurrent-ruby (~> 1.0)
     io-console (0.8.0)

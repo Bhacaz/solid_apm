@@ -7,7 +7,6 @@ module SolidApm
     def index
       if from_to_range.end < from_to_range.begin
         flash[:error] = 'Invalid time range'
-        default_time_range
         redirect_to transactions_path
         return
       end
@@ -63,7 +62,8 @@ module SolidApm
         scope = scope.where(name: params[:name])
       end
 
-      render json: aggregate(scope.select(:id, :created_at).find_each, from_to_range, intervals_count: 20).transform_values!(&:count)
+      # Maybe only extract what I need from Groupdate so I dont depend on it.
+      render json: scope.group_by_second(:created_at, n: n_intervals_seconds(from_to_range)).count
     end
 
     private
@@ -78,11 +78,11 @@ module SolidApm
       (from..to)
     end
 
-    def default_time_range
-      params[:from_value] = 60
-      params[:from_unit] = 'minutes'
-      params[:to_value] = 1
-      params[:to_unit] = 'seconds'
+    def n_intervals_seconds(range, intervals_count: 20)
+      start_time = range.begin
+      end_time = range.end
+      time_range_in_seconds = (end_time - start_time).to_i
+      (time_range_in_seconds / intervals_count.to_f).round
     end
 
     def aggregate(items, range, intervals_count: 20)
