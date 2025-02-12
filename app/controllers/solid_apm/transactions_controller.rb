@@ -48,8 +48,8 @@ module SolidApm
       @aggregated_transactions = @aggregated_transactions.sort_by { |_, v| -v.impact }.to_h
 
       scope = transactions_scope.group_by_second(:created_at, n: n_intervals_seconds(from_to_range))
-      @throughput_data = scope.count.map { |k, v| {x: k, y: v} }
-      @latency_data = scope.median(:duration).map { |k, v| {x: k, y: v.to_i} }
+      @throughput_data = scope.count
+      @latency_data = scope.median(:duration).transform_values(&:to_i)
     end
 
     def show_by_name

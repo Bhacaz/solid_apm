@@ -32,17 +32,11 @@
 <div class="columns pt-2" style="height: 16em">
   <div class="column">
     <h2 class="ml-4">Throughput</h2>
-    <div data-controller="transaction-chart"
-         data-transaction-chart-name-value="tpm"
-         data-transaction-chart-color-value="#43BCCD"
-         data-transaction-chart-data-value="<%= @throughput_data.to_json %>"></div>
+    <%= area_chart({ name: 'tmp', data: @throughput_data }, area_chart_options.merge(colors: ['#43BCCD'])) %>
   </div>
   <div class="column">
     <h2 class="ml-4">Latency</h2>
-    <div data-controller="transaction-chart"
-         data-transaction-chart-name-value="ms"
-         data-transaction-chart-color-value="#13d8aa"
-         data-transaction-chart-data-value="<%= @latency_data.to_json %>"></div>
+    <%= area_chart({ name: 'ms', data: @latency_data }, area_chart_options.merge(colors: ['#13d8aa'])) %>
   </div>
 </div>
 

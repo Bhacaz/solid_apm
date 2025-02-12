@@ -1,5 +1,7 @@
+require 'English' # For apexcharts Regex
 require 'groupdate'
 require 'active_median'
+require 'apexcharts'
 
 require "solid_apm/version"
 require "solid_apm/engine"

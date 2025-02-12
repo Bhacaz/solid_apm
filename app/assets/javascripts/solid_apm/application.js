@@ -8,4 +8,3 @@ window.Stimulus = Application.start();
 
 // require "./controllers/spans-chart_controller"
 // import "./controllers/spans-chart_controller.js"
-// import "./controllers/transaction-chart_controller"
