@@ -57,7 +57,7 @@ module SolidApm
 
     def spans
       @transaction = Transaction.find_by!(uuid: params[:uuid])
-      @spans = @transaction.spans
+      @transaction.spans.to_a.sort_by!(&:timestamp)
     end
 
     private
