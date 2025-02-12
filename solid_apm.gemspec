@@ -8,6 +8,7 @@ Gem::Specification.new do |spec|
   spec.homepage    = "https://github.com/Bhacaz/solid_apm"
   spec.summary     = "SolidApm is a DB base engine for Application Performance Monitoring."
   spec.description = "SolidApm allow you to monitor your application without any external service."
+  spec.license     = 'MIT'
 
   spec.required_ruby_version = Gem::Requirement.new('>= 3.2')
   spec.metadata["homepage_uri"] = spec.homepage
