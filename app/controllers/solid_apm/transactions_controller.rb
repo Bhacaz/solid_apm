@@ -10,6 +10,7 @@ module SolidApm
         redirect_to transactions_path
         return
       end
+
       @aggregated_transactions = Transaction.where(created_at: from_to_range).group_by(&:name)
       @aggregated_transactions.transform_values! do |transactions|
         latency = transactions.map(&:duration).sum / transactions.size
@@ -24,9 +25,8 @@ module SolidApm
           impact
         )
       end
-      if @aggregated_transactions.empty?
-        return
-      end
+
+      return if @aggregated_transactions.empty?
       # Find the maximum and minimum impact values
       max_impact = @aggregated_transactions.values.max_by(&:impact).impact
       min_impact = @aggregated_transactions.values.min_by(&:impact).impact
@@ -38,16 +38,12 @@ module SolidApm
         aggregation.impact = normalized_impact.to_i || 0
       end
       @aggregated_transactions = @aggregated_transactions.sort_by { |_, v| -v.impact }.to_h
-      @throughput_data = Transaction
-                           .where(created_at: from_to_range)
-                           .group_by_second(:created_at, n: n_intervals_seconds(from_to_range))
-                           .count
-                           .map { |k, v| {x: k, y: v} }
-      @latency_data = Transaction
-                        .where(created_at: from_to_range)
-                        .group_by_second(:created_at, n: n_intervals_seconds(from_to_range))
-                        .average(:duration)
-                        .map { |k, v| {x: k, y: v.to_i} }
+
+      scope = Transaction
+                .where(created_at: from_to_range)
+                .group_by_second(:created_at, n: n_intervals_seconds(from_to_range))
+      @throughput_data = scope.count.map { |k, v| {x: k, y: v} }
+      @latency_data = scope.average(:duration).map { |k, v| {x: k, y: v.to_i} }
     end
 
     def show_by_name

@@ -1,12 +1,4 @@
 import {Controller,} from "https://unpkg.com/@hotwired/stimulus/dist/stimulus.js";
-// unload chart https://github.com/Deanout/weight_tracker/blob/d4123acb952d91fcc9bedb96bbd786088a71482a/app/javascript/controllers/weights_controller.js#L4
-// tooltip: {
-//   y: {
-//     formatter: function (value, {series, seriesIndex, dataPointIndex, w}) {
-//       return w.globals.initialSeries[seriesIndex].data[dataPointIndex].name + "\n" + value + "ms"
-//     }
-//   }
-// }
 
 // Connects to data-controller="transaction-chart"
 window.Stimulus.register('transaction-chart', class extends Controller {
