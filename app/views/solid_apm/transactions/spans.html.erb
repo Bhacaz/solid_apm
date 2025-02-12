@@ -1,0 +1,34 @@
+<h1 class="title"><%= link_to '⬅ ', request.referer %><%= @transaction.name %></h1>
+<h2 class="title is-6"><span class="has-text-grey">Trace ID:</span> <%= @transaction.uuid %></h2>
+<h2 class="title is-6"><span class="has-text-grey">Timestamp:</span> <%= @transaction.timestamp %></h2>
+<h2 class="title is-6"><span class="has-text-grey">Duration:</span> <%= @transaction.duration.round(2) %> ms</h2>
+<h2 class="title is-6"><span class="has-text-grey">Metadata:</span> <%= @transaction.metadata %></h2>
+
+<h2 class="title is-4 mt-6">Spans</h2>
+
+<% min_start_time = @transaction.spans.minimum(:timestamp) %>
+<% max_end_time = @transaction.spans.maximum(:end_time) %>
+<% total_duration = max_end_time - min_start_time %>
+
+<div class="is-fullwidth">
+  <% @transaction.spans.each do |span| %>
+    <% left_percent = ((span.timestamp - min_start_time).to_f / total_duration * 100) %>
+    <% width_percent = [((span.end_time - span.timestamp).to_f / total_duration * 100), 0.1].max %>
+    <% right_percent = (100 - left_percent - width_percent) %>
+
+    <div style="display: flex; height: 1.5em;">
+      <div style="flex: <%= left_percent %>"></div>
+      <div style="flex: <%= width_percent %>; display: flex; align-items: center; justify-content: center; border-radius: 5px" class="has-background-primary-15">
+      </div>
+      <div style="flex: <%= right_percent %>;"></div>
+    </div>
+    <div style="margin-left: <%= left_percent %>%" class="mt-1 mb-2">
+      <p>
+        <span class="has-text-grey-lighter	"><%= span.name %></span><span class="has-text-grey pl-2"><%= span.duration.round(2) %>ms</span>
+      </p>
+      <p>
+        <%= span.summary %>
+      </p>
+    </div>
+  <% end %>
+  </div>

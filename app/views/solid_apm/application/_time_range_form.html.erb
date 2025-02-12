@@ -1,0 +1,34 @@
+<%= form_with path: transactions_path, method: :get do |f| %>
+  <div class="is-flex is-flex-direction-row is-justify-content-center is-align-items-center" style="gap: 1em">
+    <%= f.number_field :from_value, value: params[:from_value] || 60, min: 1, class: 'input', style: 'width: 6em' %>
+    <div class="select">
+      <%= f.select :from_unit, {
+        "minutes" => "minutes",
+        "hours" => "hours",
+        "days" => "days",
+        "weeks" => "weeks",
+        "months" => "months",
+        "years" => "years"
+      }, {selected: params[:from_unit] || 'minutes' } %>
+    </div>
+    <b>→</b>
+    <%= f.number_field :to_value, value: params[:to_value] || 1, min: 1, class: 'input', style: 'width: 6em' %>
+    <div class="select">
+      <%= f.select :to_unit, {
+        "seconds" => "seconds",
+        "minutes" => "minutes",
+        "hours" => "hours",
+        "days" => "days",
+        "weeks" => "weeks",
+        "months" => "months",
+        "years" => "years"
+      }, {selected: params[:to_unit] || 'seconds' } %>
+    </div>
+
+    <% if params[:name] %>
+      <%= f.hidden_field :name, value: params[:name] %>
+    <% end %>
+
+    <%= f.submit 'Apply', class: 'button' %>
+  </div>
+<% end %>

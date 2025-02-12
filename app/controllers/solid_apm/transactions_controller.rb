@@ -3,22 +3,41 @@
 module SolidApm
   class TransactionsController < ApplicationController
     TransactionAggregation = Struct.new(:name, :tmp, :latency, :percentile_95, :impact)
+    private_constant :TransactionAggregation
 
     def index
-      @aggregated_transactions = Transaction.where(created_at: from_to_range).group_by(&:name)
-      @aggregated_transactions.transform_values! do |transactions|
-        latency = transactions.map(&:duration).sum / transactions.size
-        tmp = transactions.size.to_f / ((from_to_range.end - from_to_range.begin) / 60).to_i
+      if from_to_range.end < from_to_range.begin
+        flash[:error] = 'Invalid time range'
+        redirect_to transactions_path
+        return
+      end
+
+      @transactions_scope = Transaction.where(timestamp: from_to_range)
+      if params[:name].present?
+        @transactions_scope = @transactions_scope.where(name: params[:name])
+      end
+      transaction_names = @transactions_scope.distinct.pluck(:name)
+      latency_95p = @transactions_scope.group(:name).percentile(:duration, 0.95)
+      latency_median = @transactions_scope.group(:name).median(:duration)
+      tmp_dict = @transactions_scope.group(:name).group_by_minute(:timestamp, series: false).count.each_with_object({}) do |(k, v), h|
+        current_value = h[k.first] ||= 0
+        h[k.first] = v if v > current_value
+      end
+
+      @aggregated_transactions = transaction_names.each_with_object({}) do |transaction_name, h|
+        latency = latency_median[transaction_name]
+        tmp = tmp_dict[transaction_name]
         impact = latency * tmp
-        percentile_95 = transactions[transactions.size * 0.95].duration
-        TransactionAggregation.new(
-          transactions.first.name,
+        h[transaction_name] = TransactionAggregation.new(
+          transaction_name,
           tmp,
           latency,
-          percentile_95,
+          latency_95p[transaction_name],
           impact
         )
       end
+
+      return if @aggregated_transactions.empty?
       # Find the maximum and minimum impact values
       max_impact = @aggregated_transactions.values.max_by(&:impact).impact
       min_impact = @aggregated_transactions.values.min_by(&:impact).impact
@@ -30,32 +49,15 @@ module SolidApm
         aggregation.impact = normalized_impact.to_i || 0
       end
       @aggregated_transactions = @aggregated_transactions.sort_by { |_, v| -v.impact }.to_h
-    end
 
-    def show_by_name
-      @transactions = Transaction.where(name: params[:name]).order(timestamp: :desc).limit(20)
-    end
-
-    def show
-      @transaction = Transaction.find(params[:id])
+      scope = @transactions_scope.group_by_second(:timestamp, n: n_intervals_seconds(from_to_range))
+      @throughput_data = scope.count
+      @latency_data = scope.median(:duration).transform_values(&:to_i)
     end
 
     def spans
-      @transaction = Transaction.find(params[:id])
-      @spans = @transaction.spans
-      render json: @spans
-    end
-
-    def count_time_aggregations
-      scope = Transaction.all.order(timestamp: :desc)
-                 .where(created_at: from_to_range)
-
-
-      if params[:name].present?
-        scope = scope.where(name: params[:name])
-      end
-
-      render json: aggregate(scope.select(:id, :created_at).find_each, from_to_range, intervals_count: 20).transform_values!(&:count)
+      @transaction = Transaction.find_by!(uuid: params[:uuid])
+      @transaction.spans.to_a
     end
 
     private
@@ -64,8 +66,17 @@ module SolidApm
       params[:from_value] ||= 60
       params[:from_unit] ||= 'minutes'
       from = params[:from_value].to_i.public_send(params[:from_unit].to_sym).ago
-      to = Time.current
+      params[:to_value] ||= 1
+      params[:to_unit] ||= 'seconds'
+      to = params[:to_value].to_i.public_send(params[:to_unit].to_sym).ago
       (from..to)
+    end
+
+    def n_intervals_seconds(range, intervals_count: 30)
+      start_time = range.begin
+      end_time = range.end
+      time_range_in_seconds = (end_time - start_time).to_i
+      (time_range_in_seconds / intervals_count.to_f).round
     end
 
     def aggregate(items, range, intervals_count: 20)

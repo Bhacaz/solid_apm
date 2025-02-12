@@ -43,7 +43,6 @@ module SolidApm
       now = Time.zone.now
       SpanSubscriber::Base.transaction = Transaction.new(
         uuid: SecureRandom.uuid,
-        timestamp: now,
         unix_minute: (now.to_f / 60).to_i,
         type: 'request'
       )

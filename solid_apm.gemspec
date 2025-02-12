@@ -24,4 +24,7 @@ Gem::Specification.new do |spec|
     spec.add_dependency "activerecord", rails_version
     spec.add_dependency "railties", rails_version
   end
+  spec.add_dependency 'apexcharts'
+  spec.add_dependency "groupdate"
+  spec.add_dependency 'active_median'
 end
