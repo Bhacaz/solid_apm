@@ -5,6 +5,12 @@ module SolidApm
     TransactionAggregation = Struct.new(:name, :tmp, :latency, :percentile_95, :impact)
 
     def index
+      if from_to_range.end < from_to_range.begin
+        flash[:error] = 'Invalid time range'
+        default_time_range
+        redirect_to transactions_path
+        return
+      end
       @aggregated_transactions = Transaction.where(created_at: from_to_range).group_by(&:name)
       @aggregated_transactions.transform_values! do |transactions|
         latency = transactions.map(&:duration).sum / transactions.size
@@ -18,6 +24,9 @@ module SolidApm
           percentile_95,
           impact
         )
+      end
+      if @aggregated_transactions.empty?
+        return
       end
       # Find the maximum and minimum impact values
       max_impact = @aggregated_transactions.values.max_by(&:impact).impact
@@ -47,9 +56,8 @@ module SolidApm
     end
 
     def count_time_aggregations
-      scope = Transaction.all.order(timestamp: :desc)
+      scope = Transaction.order(timestamp: :desc)
                  .where(created_at: from_to_range)
-
 
       if params[:name].present?
         scope = scope.where(name: params[:name])
@@ -64,8 +72,17 @@ module SolidApm
       params[:from_value] ||= 60
       params[:from_unit] ||= 'minutes'
       from = params[:from_value].to_i.public_send(params[:from_unit].to_sym).ago
-      to = Time.current
+      params[:to_value] ||= 1
+      params[:to_unit] ||= 'seconds'
+      to = params[:to_value].to_i.public_send(params[:to_unit].to_sym).ago
       (from..to)
+    end
+
+    def default_time_range
+      params[:from_value] = 60
+      params[:from_unit] = 'minutes'
+      params[:to_value] = 1
+      params[:to_unit] = 'seconds'
     end
 
     def aggregate(items, range, intervals_count: 20)

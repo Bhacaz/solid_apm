@@ -17,6 +17,13 @@
   <section class="section">
     <%= yield %>
   </section>
+
+  <% if flash[:error] %>
+    <div class="notification is-danger mb-1" style="width: 20em; position: absolute; bottom: 1em; right: 1em;">
+      <button class="delete"></button>
+      <%= flash[:error] %>
+    </div>
+  <% end %>
 </body>
 
 </html>
