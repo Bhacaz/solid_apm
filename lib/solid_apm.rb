@@ -1,4 +1,6 @@
 require 'groupdate'
+require 'active_median'
+
 require "solid_apm/version"
 require "solid_apm/engine"
 

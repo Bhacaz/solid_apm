@@ -8,7 +8,7 @@ window.Stimulus.register('transaction-chart', class extends Controller {
     var options = {
       colors: [this.colorValue],
       chart: {
-        type: 'area', height: '200em', background: '0', foreColor: '#ffffff55', zoom: {
+        type: 'area', height: '200', background: '0', foreColor: '#ffffff55', zoom: {
           enabled: false,
         }, toolbar: {
           show: false,

@@ -3,6 +3,7 @@
 module SolidApm
   class TransactionsController < ApplicationController
     TransactionAggregation = Struct.new(:name, :tmp, :latency, :percentile_95, :impact)
+    private_constant :TransactionAggregation
 
     def index
       if from_to_range.end < from_to_range.begin
@@ -11,17 +12,24 @@ module SolidApm
         return
       end
 
-      @aggregated_transactions = Transaction.where(created_at: from_to_range).group_by(&:name)
-      @aggregated_transactions.transform_values! do |transactions|
-        latency = transactions.map(&:duration).sum / transactions.size
-        tmp = transactions.size.to_f / ((from_to_range.end - from_to_range.begin) / 60).to_i
+      transactions_scope = Transaction.where(created_at: from_to_range)
+      transaction_names = transactions_scope.distinct.pluck(:name)
+      latency_95p = transactions_scope.group(:name).percentile(:duration, 0.95)
+      latency_median = transactions_scope.group(:name).median(:duration)
+      tmp_dict = transactions_scope.group(:name).group_by_minute(:created_at, series: false).count.each_with_object({}) do |(k, v), h|
+        current_value = h[k.first] ||= 0
+        h[k.first] = v if v > current_value
+      end
+
+      @aggregated_transactions = transaction_names.each_with_object({}) do |transaction_name, h|
+        latency = latency_median[transaction_name]
+        tmp = tmp_dict[transaction_name]
         impact = latency * tmp
-        percentile_95 = transactions[transactions.size * 0.95].duration
-        TransactionAggregation.new(
-          transactions.first.name,
+        h[transaction_name] = TransactionAggregation.new(
+          transaction_name,
           tmp,
           latency,
-          percentile_95,
+          latency_95p[transaction_name],
           impact
         )
       end
@@ -39,11 +47,9 @@ module SolidApm
       end
       @aggregated_transactions = @aggregated_transactions.sort_by { |_, v| -v.impact }.to_h
 
-      scope = Transaction
-                .where(created_at: from_to_range)
-                .group_by_second(:created_at, n: n_intervals_seconds(from_to_range))
+      scope = transactions_scope.group_by_second(:created_at, n: n_intervals_seconds(from_to_range))
       @throughput_data = scope.count.map { |k, v| {x: k, y: v} }
-      @latency_data = scope.average(:duration).map { |k, v| {x: k, y: v.to_i} }
+      @latency_data = scope.median(:duration).map { |k, v| {x: k, y: v.to_i} }
     end
 
     def show_by_name
