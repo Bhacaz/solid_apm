@@ -11,14 +11,12 @@ jobs:
     permissions:
       contents: write
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-      - name: Publish release
-        uses: ghalactic/github-release-from-tag@v5
-        with:
-          generateReleaseNotes: "true"
-          summaryEnabled: "false"
-          prerelease: "false"
+      - name: Create GitHub release
+        run: |
+          tag_name="$(git describe --tags --abbrev=0)"
+          gh release create "${tag_name}" --verify-tag --draft --generate-notes
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
   rubygems_publish:
     name: Push gem to RubyGems.org
     runs-on: ubuntu-latest
