@@ -5,8 +5,13 @@
 <h2 class="title is-6"><span class="has-text-grey">Name:</span> <%= @span.name %></h2>
 <h2 class="title is-6"><span class="has-text-grey">Type:</span> <%= @span.type %></h2>
 <h2 class="title is-6"><span class="has-text-grey">Subtype:</span> <%= @span.subtype %></h2>
-<h2 class="title is-6"><span class="has-text-grey">Summary:</span> <%= @span.summary %></h2>
 <h2 class="title is-6"><span class="has-text-grey">Duration:</span> <%= @span.duration.round(2) %>ms</h2>
+
+<h2 class="title is-4 pt-4">Summary</h2>
+
+<pre>
+  <%= @span.summary %>
+</pre>
 
 <h2 class="title is-4 pt-4">Stacktrace</h2>
 <% if @span.stacktrace.present? %>
