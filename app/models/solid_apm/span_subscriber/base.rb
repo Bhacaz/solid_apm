@@ -46,10 +46,10 @@ module SolidApm
       def self.backtrace_cleaner
         @backtrace_cleaner ||= begin
           bc = ActiveSupport::BacktraceCleaner.new
-          app_root = "#{Rails.root}/"
+          bc.remove_filters!
           gem_roots = Gem.path
-          [app_root, *gem_roots].each do |root|
-             bc.add_filter { |line| line.delete_prefix(root) }
+          [Rails.root, *gem_roots].each do |path|
+             bc.add_filter { |line| line.delete_prefix("#{path}/") }
           end
           bc
         end
