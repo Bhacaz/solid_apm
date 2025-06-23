@@ -10,25 +10,63 @@
 <% max_end_time = @transaction.spans.maximum(:end_time) %>
 <% total_duration = max_end_time - min_start_time %>
 
+<style>
+    .span-details {
+        position: absolute;
+        right: 0;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        padding-left: .5rem;
+        height: 100%;
+        max-width: 100%;
+    }
+
+    .span-bar {
+        position: relative;
+        border-radius: 5px;
+    }
+
+    .span-details .truncate {
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        overflow: hidden;
+    }
+
+    .span-details .summary {
+        white-space: pre-wrap;
+        margin-top: .25rem;
+    }
+
+    .span-row {
+        border-bottom: 1px solid #333333;
+        padding: 0 1rem;
+    }
+
+    .span-row:last-child {
+        border-bottom: none;
+    }
+</style>
+
 <div class="is-fullwidth">
   <% @transaction.spans.each do |span| %>
     <% left_percent = ((span.timestamp - min_start_time).to_f / total_duration * 100) %>
     <% width_percent = [((span.end_time - span.timestamp).to_f / total_duration * 100), 0.1].max %>
     <% right_percent = (100 - left_percent - width_percent) %>
 
-    <div style="display: flex; height: 1.5em;">
-      <div style="flex: <%= left_percent %>"></div>
-      <div style="flex: <%= width_percent %>; display: flex; align-items: center; justify-content: center; border-radius: 5px" class="has-background-primary-15">
+    <div class="span-row" style="width: 100%; height: 6.5em;">
+      <div style="left: 0; width: 100%">
+          <div class="py-3" style="display: block;  position: relative;">
+            <div class="span-bar" style="left: <%= left_percent %>%; width: <%= width_percent %>%; height: 24px; border-radius: 5px; background-color: <%= span_type_color(span) %>"></div>
+            <div class="span-details mt-1 mb-2" style="min-width: <%= width_percent + right_percent %>%;">
+              <div class="is-flex is-align-items-center">
+                <span class="has-text-grey-lighter truncate"><%= link_to span.name, span_path(span.uuid) %></span>
+                <span class="has-text-grey ml-2" style="white-space: nowrap;"><%= span.duration.round(2) %> ms</span>
+              </div>
+              <div class="summary has-text-grey"><%= span.summary %></div>
+            </div>
+          </div>
       </div>
-      <div style="flex: <%= right_percent %>;"></div>
-    </div>
-    <div style="margin-left: <%= left_percent %>%" class="mt-1 mb-2">
-      <p>
-        <span class="has-text-grey-lighter	"><%= span.name %></span><span class="has-text-grey pl-2"><%= span.duration.round(2) %>ms</span>
-      </p>
-      <p>
-        <%= span.summary %>
-      </p>
     </div>
   <% end %>
-  </div>
+</div>
