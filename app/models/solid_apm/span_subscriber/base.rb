@@ -43,6 +43,27 @@ module SolidApm
         end
       end
 
+      def self.backtrace_cleaner
+        @backtrace_cleaner ||= begin
+          bc = ActiveSupport::BacktraceCleaner.new
+          app_root = "#{Rails.root}/"
+          gem_roots = Gem.path
+          [app_root, *gem_roots].each do |root|
+             bc.add_filter { |line| line.delete_prefix(root) }
+          end
+          bc
+        end
+      end
+
+      def clean_trace(backtrace)
+        if backtrace.is_a?(Array)
+          self.class.backtrace_cleaner.clean(backtrace)
+        else
+          self.class.backtrace_cleaner.clean([backtrace]).first
+        end
+      end
+        
+
       # def summary(payload)
       #   if payload.is_a?(Hash)
       #     payload.first.last.inspect
