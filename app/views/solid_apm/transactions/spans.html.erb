@@ -19,7 +19,7 @@
         justify-content: center;
         padding-left: .5rem;
         height: 100%;
-        max-width: 100%;
+        max-width: 25em;
     }
 
     .span-bar {
@@ -34,7 +34,7 @@
     }
 
     .span-details .summary {
-        white-space: pre-wrap;
+        white-space: nowrap;
         margin-top: .25rem;
     }
 
@@ -57,7 +57,7 @@
     <div class="span-row" style="width: 100%; height: 6.5em;">
       <div style="left: 0; width: 100%">
           <div class="py-3" style="display: block;  position: relative;">
-            <div class="span-bar" style="left: <%= left_percent %>%; width: <%= width_percent %>%; height: 24px; border-radius: 5px; background-color: <%= span_type_color(span) %>"></div>
+            <div class="span-bar" style="left: <%= left_percent %>%; width: <%= width_percent %>%; min-width: 0.5em; height: 24px; border-radius: 5px; background-color: <%= span_type_color(span) %>"></div>
             <div class="span-details mt-1 mb-2" style="min-width: <%= width_percent + right_percent %>%;">
               <div class="is-flex is-align-items-center">
                 <span class="has-text-grey-lighter truncate"><%= link_to span.name, span_path(span.uuid) %></span>
