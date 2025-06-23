@@ -5,6 +5,7 @@ Rails engine to manage APM data without using a third party service.
 
 <img src="./docs/img.png" width="600px">
 <img src="./docs/img_1.png" width="600px">
+<img src="./docs/img_2.png" width="600px">
 
 ## Installation
 
