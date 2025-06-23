@@ -34,6 +34,7 @@ module SolidApm
             type: type,
             subtype: subtype,
             summary: self.new.summary(payload),
+            stacktrace: clean_trace(caller_locations)
           }
 
           SpanSubscriber::Base.spans << span
@@ -55,14 +56,17 @@ module SolidApm
         end
       end
 
-      def clean_trace(backtrace)
+      def self.clean_trace(backtrace)
         if backtrace.is_a?(Array)
-          self.class.backtrace_cleaner.clean(backtrace)
+          backtrace_cleaner.clean(backtrace)
         else
-          self.class.backtrace_cleaner.clean([backtrace]).first
+          backtrace_cleaner.clean([backtrace]).first
         end
       end
-        
+
+      def clean_trace(backtrace)
+        self.class.clean_trace(backtrace)
+      end
 
       # def summary(payload)
       #   if payload.is_a?(Hash)

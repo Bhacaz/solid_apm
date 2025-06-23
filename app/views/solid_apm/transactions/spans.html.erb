@@ -60,7 +60,7 @@
             <div class="span-bar" style="left: <%= left_percent %>%; width: <%= width_percent %>%; height: 24px; border-radius: 5px; background-color: <%= span_type_color(span) %>"></div>
             <div class="span-details mt-1 mb-2" style="min-width: <%= width_percent + right_percent %>%;">
               <div class="is-flex is-align-items-center">
-                <span class="has-text-grey-lighter truncate"><%= span.name %></span>
+                <span class="has-text-grey-lighter truncate"><%= link_to span.name, span_path(span.uuid) %></span>
                 <span class="has-text-grey ml-2" style="white-space: nowrap;"><%= span.duration.round(2) %> ms</span>
               </div>
               <div class="summary has-text-grey"><%= span.summary %></div>

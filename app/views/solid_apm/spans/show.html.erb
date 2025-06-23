@@ -1,0 +1,46 @@
+<h1 class="title">Span Details</h1>
+
+<h2 class="title is-6"><span class="has-text-grey">UUID:</span> <%= @span.uuid %></h2>
+<h2 class="title is-6"><span class="has-text-grey">Timestamp:</span> <%= @span.timestamp %></h2>
+<h2 class="title is-6"><span class="has-text-grey">Name:</span> <%= @span.name %></h2>
+<h2 class="title is-6"><span class="has-text-grey">Type:</span> <%= @span.type %></h2>
+<h2 class="title is-6"><span class="has-text-grey">Subtype:</span> <%= @span.subtype %></h2>
+<h2 class="title is-6"><span class="has-text-grey">Summary:</span> <%= @span.summary %></h2>
+<h2 class="title is-6"><span class="has-text-grey">Duration:</span> <%= @span.duration.round(2) %>ms</h2>
+
+<h2 class="title is-4 pt-4">Stacktrace</h2>
+<% if @span.stacktrace.present? %>
+  <button id="toggle-stacktrace" data-state="app-only">Show All</button>
+  <pre id="stacktrace" style="display: grid">
+    <% @span.stacktrace.each do |line| %>
+      <% source = line.start_with?('gems') ? 'other' : 'app' %>
+      <span class="stack-line" data-source="<%= source %>" style="<%= 'display:none;' if source == 'other' %>"><%= line %></span>
+    <% end %>
+  </pre>
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      var btn = document.getElementById('toggle-stacktrace');
+      btn.addEventListener('click', function() {
+        var state = btn.getAttribute('data-state');
+        var lines = document.querySelectorAll('#stacktrace .stack-line');
+        if (state === 'app-only') {
+          lines.forEach(function(line) {
+            line.style.display = 'inline-block';
+          });
+          btn.textContent = 'Show App Only';
+          btn.setAttribute('data-state', 'all');
+        } else {
+          lines.forEach(function(line) {
+            if (line.dataset.source === 'other') {
+              line.style.display = 'none';
+            }
+          });
+          btn.textContent = 'Show All';
+          btn.setAttribute('data-state', 'app-only');
+        }
+      });
+    });
+  </script>
+<% else %>
+  <p>No stacktrace available.</p>
+<% end %>

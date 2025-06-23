@@ -2,7 +2,7 @@
 module SolidApm
   module SpanSubscriber
     class ActiveRecordSql < Base
-      PATTERN = "sql.active_record"
+      PATTERN = /^(sql|transaction)\.active_record/.freeze
 
       def summary(payload)
         payload[:sql]

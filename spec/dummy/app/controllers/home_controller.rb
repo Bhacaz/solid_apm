@@ -11,9 +11,9 @@ class HomeController < ApplicationController
     ActiveSupport::Notifications.instrument("sql.active_record", sql: "SELECT * FROM users") do
       sleep 0.1
     end
-    ActiveSupport::Notifications.instrument("request.net_http", 'GET https://example.com') do
-      sleep 0.1
-    end
+    require 'net/http'
+    uri = URI('https://google.ca')
+    Net::HTTP.get_response(uri)
     redirect_to home_path
   end
 end
