@@ -19,3 +19,5 @@ gem 'logger'
 group :test do
   gem 'rspec-rails'
 end
+
+gem "fast-mcp", "~> 1.5"

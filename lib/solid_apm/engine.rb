@@ -12,6 +12,7 @@ module SolidApm
 
     config.after_initialize do
       SpanSubscriber::Base.subscribe!
+      # require_relative '../../config/fast_mcp'
     end
   end
 end
