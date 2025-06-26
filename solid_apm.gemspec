@@ -26,6 +26,7 @@ Gem::Specification.new do |spec|
     spec.add_dependency "railties", rails_version
   end
   spec.add_dependency 'apexcharts'
-  spec.add_dependency "groupdate"
   spec.add_dependency 'active_median'
+  spec.add_dependency "fast-mcp", "~> 1.5"
+  spec.add_dependency 'groupdate'
 end
