@@ -3,9 +3,6 @@
 module SolidApm
   class SpansMcpTool < FastMcp::Tool
     tool_name "longest-spans-for-transaction"
-    # uri "solid-apm://spans/{transaction_uuid}"
-    # resource_name "traces"
-    # mime_type "application/json"
     description "Returns longest spans for a specific transaction uuid in the APM system, with backtrace information and metadata"
 
     arguments do
