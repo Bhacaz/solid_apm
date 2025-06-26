@@ -23,7 +23,9 @@ module SolidApm
         auth_token: ENV.fetch('SOLID_APM_MCP_AUTH_TOKEN', nil),
       ) do |server|
         app.config.after_initialize do
-          mcp_path = File.expand_path('../../../app/mcp', __FILE__)
+          mcp_path = File.expand_path(__dir__, '../../app/resources/mcp')
+          Dir[File.join(mcp_path, '**', '*.rb')].sort.each { |file| require file }
+          mcp_path = File.expand_path(__dir__, '../../app/tools/mcp')
           Dir[File.join(mcp_path, '**', '*.rb')].sort.each { |file| require file }
 
           server.register_resources(*SolidApm::Mcp::ApplicationResource.descendants)
