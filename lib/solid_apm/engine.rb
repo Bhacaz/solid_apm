@@ -18,7 +18,9 @@ module SolidApm
         version: '1.0.0',
         path_prefix: '/solid_apm/mcp',
         messages_route: 'messages',
-        sse_route: 'sse'
+        sse_route: 'sse',
+        authenticate: true,
+        auth_token: ENV.fetch('SOLID_APM_MCP_AUTH_TOKEN'),
       ) do |server|
         app.config.after_initialize do
           mcp_path = File.expand_path('../../../app/mcp', __FILE__)
