@@ -21,6 +21,7 @@ module SolidApm
         sse_route: 'sse',
         authenticate: true,
         auth_token: ENV.fetch('SOLID_APM_MCP_AUTH_TOKEN', nil),
+        allowed_ips: ['192.168.0.208']
       ) do |server|
         app.config.after_initialize do
           Dir[File.join(__dir__, '../../app/resources/solid_apm/mcp/**/*.rb')].sort.each { |file| require file }
