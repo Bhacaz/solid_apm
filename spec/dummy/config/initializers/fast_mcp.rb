@@ -44,15 +44,16 @@ FastMcp.mount_in_rails(
   ) do |server|
   Rails.application.config.after_initialize do
     require_relative '../../../../app/mcp_resources/application_mcp_resource'
-    require_relative '../../../../app/mcp_resources/traces_mcp_resource'
+    require_relative '../../../../app/mcp_resources/spans_mcp_tool'
     require_relative '../../../../app/mcp_resources/longest_transaction_resource'
+    require_relative '../../../../app/mcp_resources/impactful_transactions_resource'
     # FastMcp will automatically discover and register:
     # - All classes that inherit from ApplicationTool (which uses ActionTool::Base)
     # - All classes that inherit from ApplicationResource (which uses ActionResource::Base)
     # server.register_tools(*ApplicationTool.descendants)
     # server.register_resources(*ApplicationResource.descendants)
     server.register_resources(*SolidApm::ApplicationMcpResource.descendants)
-    server.register_tool(CreateUserTool)
+    server.register_tool(SolidApm::SpansMcpTool)
     # alternatively, you can register tools and resources manually:
     # server.register_tool(MyTool)
     # server.register_resource(MyResource)
