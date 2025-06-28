@@ -15,7 +15,7 @@ module SolidApm
         metadata: {
           total_transactions_analyzed: SolidApm::Transaction.where(timestamp: 24.hours.ago..).count,
           analysis_period: "last 24 hours",
-          impact_score_explanation: "Calculated based on P95 latency, transaction frequency, span complexity, and error rate"
+          ordered_by: "More impactful first: based on P95 latency, transaction frequency, span complexity."
         },
         transactions: transactions_with_impact.map do |transaction_data|
           {
@@ -23,7 +23,6 @@ module SolidApm
             uuid: transaction_data[:transaction].uuid,
             name: transaction_data[:transaction].name,
             type: transaction_data[:transaction].type,
-            impact_score: transaction_data[:impact_score],
             metrics: {
               p95_latency_ms: transaction_data[:p95_latency],
               avg_duration_ms: transaction_data[:avg_duration],
@@ -59,49 +58,54 @@ module SolidApm
         transaction_groups = SolidApm::Transaction.includes(:spans).where(timestamp: cutoff_time..).group_by { |t| [t.name, t.type] }
 
         impact_data = transaction_groups.map do |group_key, transactions| name, type = group_key
-        durations = transactions.map(&:duration).compact
-        span_counts = transactions.map { |t| t.spans.size }
+          durations = transactions.map(&:duration).compact
+          span_counts = transactions.map { |t| t.spans.size }
 
-        next if durations.empty?
+          next if durations.empty?
 
-        # Calculate P95 latency
-        p95_latency = calculate_percentile(durations, 95)
-        avg_duration = durations.sum / durations.size.to_f
-        max_duration = durations.max
+          # Calculate P95 latency
+          p95_latency = calculate_percentile(durations, 95)
+          avg_duration = durations.sum / durations.size.to_f
+          max_duration = durations.max
 
-        # Calculate transaction frequency metrics
-        total_count = transactions.size
-        time_span_hours = [(Time.current - transactions.map(&:timestamp).min) / 1.hour, 1].max
-        tpm = (total_count / (time_span_hours * 60)).round(2)
+          # Calculate transaction frequency metrics
+          total_count = transactions.size
+          time_span_hours = [(Time.current - transactions.map(&:timestamp).min) / 1.hour, 1].max
+          tpm = (total_count / (time_span_hours * 60)).round(2)
 
-        # Calculate max TPM by looking at busiest minute
-        max_tpm = calculate_max_tpm(transactions)
+          # Calculate max TPM by looking at busiest minute
+          max_tpm = calculate_max_tpm(transactions)
 
-        # Span complexity metrics
-        avg_spans = span_counts.sum / span_counts.size.to_f
-        max_spans = span_counts.max || 0
+          # Span complexity metrics
+          avg_spans = span_counts.sum / span_counts.size.to_f
+          max_spans = span_counts.max || 0
 
-        # Get a representative sample transaction
-        sample_transaction = transactions.max_by(&:duration)
-        sample_span_count = sample_transaction&.spans&.size || 0
+          # Get a representative sample transaction
+          sample_transaction = transactions.max_by(&:duration)
+          sample_span_count = sample_transaction&.spans&.size || 0
 
-        {
-          transaction: transactions.first, # Representative transaction for metadata
-          p95_latency: p95_latency.round(2),
-          avg_duration: avg_duration.round(2),
-          max_duration: max_duration.round(2),
-          tpm: tpm,
-          max_tpm: max_tpm,
-          avg_spans: avg_spans.round(1),
-          max_spans: max_spans,
-          total_count: total_count,
-          sample_transaction: sample_transaction,
-          sample_span_count: sample_span_count
-        }
+          {
+            transaction: transactions.first, # Representative transaction for metadata
+            p95_latency: p95_latency.round(2),
+            avg_duration: avg_duration.round(2),
+            max_duration: max_duration.round(2),
+            tpm: tpm,
+            max_tpm: max_tpm,
+            avg_spans: avg_spans.round(1),
+            max_spans: max_spans,
+            total_count: total_count,
+            sample_transaction: sample_transaction,
+            sample_span_count: sample_span_count
+          }
         end.compact
 
         # Sort by impact score and return top 10
-        impact_data.sort_by { |data| -data[:impact_score] }.first(10)
+        impact_data.sort_by do |data|
+          -calculate_impact_score(p95_latency: data[:p95_latency],
+                                  tpm: data[:tpm],
+                                  avg_spans: data[:avg_spans],
+                                  total_count: data[:total_count])
+        end.first(10)
       end
 
       def calculate_percentile(array, percentile)

@@ -25,10 +25,10 @@ module SolidApm
         **mcp_server_config
       ) do |server|
         app.config.after_initialize do
-          require_relative 'mcp/longest_spans_tool'
+          require_relative 'mcp/spans_for_transaction_tool'
           require_relative 'mcp/impactful_transactions_resource'
           server.register_resources(SolidApm::Mcp::ImpactfulTransactionsResource)
-          server.register_tools(SolidApm::Mcp::LongestSpansTool)
+          server.register_tools(SolidApm::Mcp::SpansForTransactionTool)
         end
       end
     end
