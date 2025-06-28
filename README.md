@@ -73,6 +73,26 @@ Control whether ActiveRecord logger is silenced during SolidAPM operations (defa
 SolidApm.silence_active_record_logger = false
 ```
 
+### Transaction Sampling
+
+Control the sampling rate for transactions using a "1 out of N" approach (default: `1`):
+
+```ruby
+# Sample every transaction (default behavior)
+SolidApm.transaction_sampling = 1
+
+# Sample 1 out of every 2 transactions (50% sampling)
+SolidApm.transaction_sampling = 2
+
+# Sample 1 out of every 5 transactions (20% sampling)  
+SolidApm.transaction_sampling = 5
+
+# Sample 1 out of every 10 transactions (10% sampling)
+SolidApm.transaction_sampling = 10
+```
+
+The sampling is done per-thread using a round-robin counter, ensuring even distribution across requests. This is useful for high-traffic applications where you want to reduce the volume of APM data while still maintaining representative performance insights.
+
 ## MCP Server
 
 SolidAPM offers an optional MCP server to allow an AI agent to interact with SolidAPM
