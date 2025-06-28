@@ -9,6 +9,7 @@ require "solid_apm/engine"
 module SolidApm
   mattr_accessor :connects_to
   mattr_accessor :mcp_server_config, default: {}
+  mattr_accessor :silence_active_record_logger, default: true
 
   def self.set_context(context)
     SpanSubscriber::Base.context = context
