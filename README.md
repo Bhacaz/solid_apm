@@ -55,12 +55,8 @@ end
 ## MCP Server
 
 SolidAPM offer a optional MCP server to allow an AI agent to interact with SolidAPM
-and help identify issues in your application, such as slow transactions,
+and help identify issues in your application, such as  
 N+1 queries, slow queries and more. The AI agent can analyze and suggest fixes for these issues.
-
-1. Add the MCP resource `impactful-transactions` to the context of your prompt.
-2. Prompt example: "Analyze the impactful transactions of my application and suggest improvements, base on the spans details."
-3. Allow the AI agent to use the MCP tool `longest-spans-for-transaction` to retrieve the longest spans for a specific transaction.
 
 ### MCP Server Configuration
 
@@ -94,6 +90,12 @@ curl -X POST http://localhost:3000/solid_apm/mcp \
   -H "Authorization: Bearer <AUTH_TOKEN>" \
   -d '{"jsonrpc":"2.0","method":"tools/list","id":1}
 ```
+
+### MCP usage
+
+1. Add the MCP resource `impactful-transactions` to the context of your prompt.
+2. Prompt example: "Analyze the impactful transactions of my application and suggest improvements, base on the spans details."
+3. Allow the AI agent to use the MCP tool `spans-for-transaction` to retrieve the longest spans for a specific transaction.
 
 ## TODOs
 
