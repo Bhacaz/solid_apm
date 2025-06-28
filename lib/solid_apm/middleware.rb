@@ -28,16 +28,28 @@ module SolidApm
         return
       end
 
-      ApplicationRecord.transaction do
-        transaction.save!
+      with_silence_logger do
+        ApplicationRecord.transaction do
+          transaction.save!
 
-        SpanSubscriber::Base.spans.each do |span|
-          span[:transaction_id] = transaction.id
+          SpanSubscriber::Base.spans.each do |span|
+            span[:transaction_id] = transaction.id
+          end
+          SolidApm::Span.insert_all SpanSubscriber::Base.spans
         end
-        SolidApm::Span.insert_all SpanSubscriber::Base.spans
       end
       SpanSubscriber::Base.spans = nil
     end
+
+    def self.with_silence_logger
+      if ActiveRecord::Base.logger
+        ActiveRecord::Base.logger.silence { yield }
+      else
+        yield
+      end
+    end
+
+    # Initialize a new transaction and reset spans
 
     def self.init_transaction
       now = Time.zone.now
