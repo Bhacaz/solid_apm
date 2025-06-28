@@ -13,7 +13,7 @@ module SolidApm
 
       result = {
         metadata: {
-          total_transactions_analyzed: SolidApm::Transaction.count,
+          total_transactions_analyzed: SolidApm::Transaction.where(timestamp: 24.hours.ago..).count,
           analysis_period: "last 24 hours",
           impact_score_explanation: "Calculated based on P95 latency, transaction frequency, span complexity, and error rate"
         },
@@ -57,7 +57,7 @@ module SolidApm
         cutoff_time = 24.hours.ago
 
         # Group transactions by name and type to aggregate metrics
-        transaction_groups = SolidApm::Transaction.includes(:spans).where('timestamp >= ?', cutoff_time).group_by { |t| [t.name, t.type] }
+        transaction_groups = SolidApm::Transaction.includes(:spans).where(timestamp: cutoff_time..).group_by { |t| [t.name, t.type] }
 
         impact_data = transaction_groups.map do |group_key, transactions| name, type = group_key
         durations = transactions.map(&:duration).compact

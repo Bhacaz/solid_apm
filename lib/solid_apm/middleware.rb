@@ -23,7 +23,7 @@ module SolidApm
     def self.call
       transaction = SpanSubscriber::Base.transaction
       SpanSubscriber::Base.transaction = nil
-      if transaction.nil? || transaction.name.start_with?('SolidApm::')
+      if transaction.nil? || transaction.name.start_with?('SolidApm::') || transaction.name.start_with?('ActionDispatch::Request::PASS_NOT_FOUND')
         SpanSubscriber::Base.spans = nil
         return
       end
