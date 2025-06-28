@@ -34,7 +34,6 @@ module SolidApm
               max_spans_per_transaction: transaction_data[:max_spans],
               total_occurrences: transaction_data[:total_count],
             },
-            optimization_opportunities: generate_optimization_suggestions(transaction_data),
             sample_transaction: {
               uuid: transaction_data[:sample_transaction]&.uuid,
               duration_ms: transaction_data[:sample_transaction]&.duration,
@@ -82,16 +81,22 @@ module SolidApm
         avg_spans = span_counts.sum / span_counts.size.to_f
         max_spans = span_counts.max || 0
 
-        # Calculate impact score
-        impact_score = calculate_impact_score(p95_latency: p95_latency, tpm: tpm, avg_spans: avg_spans, total_count: total_count
-        )
-
         # Get a representative sample transaction
         sample_transaction = transactions.max_by(&:duration)
         sample_span_count = sample_transaction&.spans&.size || 0
 
-        { transaction: transactions.first, # Representative transaction for metadata
-          impact_score: impact_score, p95_latency: p95_latency.round(2), avg_duration: avg_duration.round(2), max_duration: max_duration.round(2), tpm: tpm, max_tpm: max_tpm, avg_spans: avg_spans.round(1), max_spans: max_spans, total_count: total_count, sample_transaction: sample_transaction, sample_span_count: sample_span_count
+        {
+          transaction: transactions.first, # Representative transaction for metadata
+          p95_latency: p95_latency.round(2),
+          avg_duration: avg_duration.round(2),
+          max_duration: max_duration.round(2),
+          tpm: tpm,
+          max_tpm: max_tpm,
+          avg_spans: avg_spans.round(1),
+          max_spans: max_spans,
+          total_count: total_count,
+          sample_transaction: sample_transaction,
+          sample_span_count: sample_span_count
         }
         end.compact
 
@@ -131,28 +136,6 @@ module SolidApm
         volume_score = Math.log([total_count, 1].max) * 10 # Total volume
 
         (latency_score + frequency_score + complexity_score + volume_score).round(2)
-      end
-
-      def generate_optimization_suggestions(transaction_data)
-        suggestions = []
-
-        if transaction_data[:p95_latency] > 1000
-          suggestions << "High P95 latency detected - consider database query optimization or caching"
-        end
-
-        if transaction_data[:avg_spans] > 50
-          suggestions << "High span count indicates complex operations - consider breaking down into smaller operations"
-        end
-
-        if transaction_data[:tpm] > 100
-          suggestions << "High transaction frequency - ensure proper caching and connection pooling"
-        end
-
-        if transaction_data[:max_tpm] > transaction_data[:tpm] * 3
-          suggestions << "Traffic spikes detected - consider auto-scaling and rate limiting"
-        end
-
-        suggestions.empty? ? ["Transaction appears to be performing well"] : suggestions
       end
     end
   end
