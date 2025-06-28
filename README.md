@@ -54,7 +54,7 @@ end
 
 ## MCP Server
 
-SolidAPM offer a optional MCP server to allow an AI agent to interact with SolidAPM
+SolidAPM offers an optional MCP server to allow an AI agent to interact with SolidAPM
 and help identify issues in your application, such as  
 N+1 queries, slow queries and more. The AI agent can analyze and suggest fixes for these issues.
 
