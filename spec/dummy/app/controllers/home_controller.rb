@@ -16,4 +16,14 @@ class HomeController < ApplicationController
     Net::HTTP.get_response(uri)
     redirect_to home_path
   end
+
+  def generate_n_plus_one
+    @transactions = SolidApm::Transaction.last(100)
+    @transactions.each do |transaction|
+      transaction.spans.each do |span|
+        span.name
+      end
+    end
+    redirect_to home_path
+  end
 end

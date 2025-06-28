@@ -8,6 +8,7 @@ require "solid_apm/engine"
 
 module SolidApm
   mattr_accessor :connects_to
+  mattr_accessor :mcp_server_config, default: {}
 
   def self.set_context(context)
     SpanSubscriber::Base.context = context

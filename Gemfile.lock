@@ -1,3 +1,16 @@
+GIT
+  remote: https://github.com/Bhacaz/fast-mcp.git
+  revision: 87750e14fbb9ee48fa6403a4d000b5503ce8832e
+  branch: transport
+  specs:
+    fast-mcp (1.5.0)
+      addressable (~> 2.8)
+      base64
+      dry-schema (~> 1.14)
+      json (~> 2.0)
+      mime-types (~> 3.4)
+      rack (~> 3.1)
+
 PATH
   remote: .
   specs:
@@ -86,6 +99,8 @@ GEM
       securerandom (>= 0.3)
       tzinfo (~> 2.0, >= 2.0.5)
       uri (>= 0.13.1)
+    addressable (2.8.7)
+      public_suffix (>= 2.0.2, < 7.0)
     apexcharts (0.2.0)
     base64 (0.2.0)
     benchmark (0.4.0)
@@ -97,6 +112,35 @@ GEM
     date (3.4.1)
     diff-lcs (1.5.1)
     drb (2.2.1)
+    dry-configurable (1.3.0)
+      dry-core (~> 1.1)
+      zeitwerk (~> 2.6)
+    dry-core (1.1.0)
+      concurrent-ruby (~> 1.0)
+      logger
+      zeitwerk (~> 2.6)
+    dry-inflector (1.2.0)
+    dry-initializer (3.2.0)
+    dry-logic (1.6.0)
+      bigdecimal
+      concurrent-ruby (~> 1.0)
+      dry-core (~> 1.1)
+      zeitwerk (~> 2.6)
+    dry-schema (1.14.1)
+      concurrent-ruby (~> 1.0)
+      dry-configurable (~> 1.0, >= 1.0.1)
+      dry-core (~> 1.1)
+      dry-initializer (~> 3.2)
+      dry-logic (~> 1.5)
+      dry-types (~> 1.8)
+      zeitwerk (~> 2.6)
+    dry-types (1.8.3)
+      bigdecimal (~> 3.0)
+      concurrent-ruby (~> 1.0)
+      dry-core (~> 1.0)
+      dry-inflector (~> 1.0)
+      dry-logic (~> 1.4)
+      zeitwerk (~> 2.6)
     erubi (1.13.1)
     globalid (1.2.1)
       activesupport (>= 6.1)
@@ -109,6 +153,9 @@ GEM
       pp (>= 0.6.0)
       rdoc (>= 4.0.0)
       reline (>= 0.4.2)
+    json (2.12.2)
+    jwt (2.10.1)
+      base64
     logger (1.6.5)
     loofah (2.24.0)
       crass (~> 1.0.2)
@@ -119,6 +166,10 @@ GEM
       net-pop
       net-smtp
     marcel (1.0.4)
+    mime-types (3.7.0)
+      logger
+      mime-types-data (~> 3.2025, >= 3.2025.0507)
+    mime-types-data (3.2025.0617)
     mini_mime (1.1.5)
     mini_portile2 (2.8.8)
     minitest (5.25.4)
@@ -146,6 +197,7 @@ GEM
     psych (5.2.3)
       date
       stringio
+    public_suffix (6.0.2)
     puma (6.4.2)
       nio4r (~> 2.0)
     racc (1.8.1)
@@ -229,6 +281,8 @@ PLATFORMS
 
 DEPENDENCIES
   benchmark
+  fast-mcp!
+  jwt
   logger
   propshaft
   puma
