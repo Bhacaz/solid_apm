@@ -54,8 +54,9 @@ end
 
 ## MCP Server
 
-This MCP server allows you to interact with SolidAPM to help identify issues in your application, such as slow transactions,
-N+1 queries, slow queries and more. An AI agent could analyze and suggest fixes for these issues.
+SolidAPM offer a optional MCP server to allow an AI agent to interact with SolidAPM
+and help identify issues in your application, such as slow transactions,
+N+1 queries, slow queries and more. The AI agent can analyze and suggest fixes for these issues.
 
 1. Add the MCP resource `impactful-transactions` to the context of your prompt.
 2. Prompt example: "Analyze the impactful transactions of my application and suggest improvements, base on the spans details."
