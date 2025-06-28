@@ -18,7 +18,7 @@ class HomeController < ApplicationController
   end
 
   def generate_n_plus_one
-    @transactions = SolidApm::Transaction.includes(:spans).last(20)
+    @transactions = SolidApm::Transaction.last(20)
     @transactions.each do |transaction|
       transaction.spans.each do |span|
         span.name

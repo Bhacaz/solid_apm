@@ -1,3 +1,16 @@
+GIT
+  remote: https://github.com/Bhacaz/fast-mcp.git
+  revision: 87750e14fbb9ee48fa6403a4d000b5503ce8832e
+  branch: transport
+  specs:
+    fast-mcp (1.5.0)
+      addressable (~> 2.8)
+      base64
+      dry-schema (~> 1.14)
+      json (~> 2.0)
+      mime-types (~> 3.4)
+      rack (~> 3.1)
+
 PATH
   remote: .
   specs:
@@ -130,13 +143,6 @@ GEM
       dry-logic (~> 1.4)
       zeitwerk (~> 2.6)
     erubi (1.13.1)
-    fast-mcp (1.5.0)
-      addressable (~> 2.8)
-      base64
-      dry-schema (~> 1.14)
-      json (~> 2.0)
-      mime-types (~> 3.4)
-      rack (~> 3.1)
     globalid (1.2.1)
       activesupport (>= 6.1)
     groupdate (6.5.1)
@@ -149,6 +155,8 @@ GEM
       rdoc (>= 4.0.0)
       reline (>= 0.4.2)
     json (2.12.2)
+    jwt (2.10.1)
+      base64
     logger (1.6.5)
     loofah (2.24.0)
       crass (~> 1.0.2)
@@ -274,6 +282,8 @@ PLATFORMS
 
 DEPENDENCIES
   benchmark
+  fast-mcp!
+  jwt
   logger
   propshaft
   puma

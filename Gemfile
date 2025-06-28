@@ -12,7 +12,8 @@ gem "sqlite3"
 gem "propshaft"
 gem 'benchmark'
 gem 'logger'
-
+gem 'fast-mcp', branch: 'transport', github: 'Bhacaz/fast-mcp'
+gem 'jwt'
 # Start debugger with binding.b [https://github.com/ruby/debug]
 # gem "debug", ">= 1.0.0"
 

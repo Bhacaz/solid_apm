@@ -1,4 +1,3 @@
-require 'fast_mcp'
 require_relative './middleware'
 
 module SolidApm
@@ -11,17 +10,19 @@ module SolidApm
       app.config.assets.precompile += %w( application.css application.js )
     end
 
-    initializer "solid_apm.mount_mcp_server" do |app|
+    begin
+      # Mount the MCP server only if the main app added the fast_mcp in is Gemfile.
+      require 'fast_mcp'
+      initializer "solid_apm.mount_mcp_server" do |app|
+      mcp_server_config = SolidApm.mcp_server_config.reverse_merge(
+        name: 'solid-apm-mcp',
+        version: '1.0.0',
+        path: '/solid_apm/mcp'
+      )
+
       FastMcp.mount_in_rails(
         app,
-        name: 'solid-apm',
-        version: '1.0.0',
-        path_prefix: '/solid_apm/mcp',
-        messages_route: 'messages',
-        sse_route: 'sse',
-        authenticate: true,
-        auth_token: ENV.fetch('SOLID_APM_MCP_AUTH_TOKEN', nil),
-        allowed_ips: ['192.168.0.208']
+        **mcp_server_config
       ) do |server|
         app.config.after_initialize do
           Dir[File.join(__dir__, '../../app/resources/solid_apm/mcp/**/*.rb')].sort.each { |file| require file }
@@ -30,6 +31,9 @@ module SolidApm
           server.register_tools(*SolidApm::Mcp::ApplicationTool.descendants)
         end
       end
+    end
+    rescue LoadError
+      # Ignored
     end
 
     config.after_initialize do
