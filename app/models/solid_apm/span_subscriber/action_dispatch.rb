@@ -13,7 +13,7 @@ module SolidApm
           transaction.duration = ((finish.to_f - start.to_f) * 1000).round(6)
           transaction.metadata = {
             params: payload[:request].params.except(:controller, :action),
-            context: SpanSubscriber::Base.context
+            context: SpanSubscriber::Base.context || {}
           }
           SpanSubscriber::Base.context = {}
         end
