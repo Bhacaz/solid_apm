@@ -52,6 +52,27 @@ class ApplicationController
 end
 ```
 
+## Configuration
+
+SolidAPM can be configured using the following options in your `config/initializers/solid_apm.rb` file:
+
+### Database Connection
+
+Configure the database connection for SolidAPM:
+
+```ruby
+SolidApm.connects_to = { database: { writing: :solid_apm } }
+```
+
+### ActiveRecord Logger Silencing
+
+Control whether ActiveRecord logger is silenced during SolidAPM operations (default: `true`):
+
+```ruby
+# Disable ActiveRecord logger silencing to see SQL queries in logs
+SolidApm.silence_active_record_logger = false
+```
+
 ## MCP Server
 
 SolidAPM offers an optional MCP server to allow an AI agent to interact with SolidAPM

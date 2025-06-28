@@ -42,7 +42,7 @@ module SolidApm
     end
 
     def self.with_silence_logger
-      if ActiveRecord::Base.logger
+      if SolidApm.silence_active_record_logger && ActiveRecord::Base.logger
         ActiveRecord::Base.logger.silence { yield }
       else
         yield
