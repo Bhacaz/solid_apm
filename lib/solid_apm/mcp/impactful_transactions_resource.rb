@@ -2,7 +2,7 @@
 
 module SolidApm
   module Mcp
-    class ImpactfulTransactionsResource < ApplicationResource
+    class ImpactfulTransactionsResource < FastMcp::Resource
       uri "solid-apm://impactful-transactions"
       resource_name "impactful_transactions"
       mime_type "application/json"

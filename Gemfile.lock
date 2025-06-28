@@ -20,7 +20,6 @@ PATH
       active_median
       activerecord (>= 7.1)
       apexcharts
-      fast-mcp (~> 1.5)
       groupdate
       railties (>= 7.1)
 

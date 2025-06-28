@@ -25,10 +25,10 @@ module SolidApm
         **mcp_server_config
       ) do |server|
         app.config.after_initialize do
-          Dir[File.join(__dir__, '../../app/resources/solid_apm/mcp/**/*.rb')].sort.each { |file| require file }
-          Dir[File.join(__dir__, '../../app/tools/solid_apm/mcp/**/*.rb')].sort.each { |file| require file }
-          server.register_resources(*SolidApm::Mcp::ApplicationResource.descendants)
-          server.register_tools(*SolidApm::Mcp::ApplicationTool.descendants)
+          require_relative 'mcp/longest_spans_tool'
+          require_relative 'mcp/impactful_transactions_resource'
+          server.register_resources(SolidApm::Mcp::ImpactfulTransactionsResource)
+          server.register_tools(SolidApm::Mcp::LongestSpansTool)
         end
       end
     end

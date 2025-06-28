@@ -2,7 +2,7 @@
 
 module SolidApm
   module Mcp
-    class LongestSpansTool < ApplicationTool
+    class LongestSpansTool < FastMcp::Tool
       tool_name "longest-spans-for-transaction"
       description "Returns longest spans for a specific transaction uuid in the APM system, with backtrace information and metadata"
 
