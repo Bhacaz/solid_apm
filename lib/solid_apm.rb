@@ -15,7 +15,7 @@ module SolidApm
   mattr_accessor(
     :transaction_filters, default: [
       /^SolidApm::/,
-      'ActionDispatch::Request::PASS_NOT_FOUND#index',
+      /^ActionDispatch::Request::PASS_NOT_FOUND/,
       'Rails::HealthController#show'
     ]
   )
