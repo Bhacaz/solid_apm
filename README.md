@@ -91,7 +91,18 @@ SolidApm.transaction_sampling = 5
 SolidApm.transaction_sampling = 10
 ```
 
-The sampling is done per-thread using a round-robin counter, ensuring even distribution across requests. This is useful for high-traffic applications where you want to reduce the volume of APM data while still maintaining representative performance insights.
+The sampling is done per-thread using a round-robin counter, ensuring even distribution across requests.
+This is useful for high-traffic applications where you want to reduce the volume of
+APM data while still maintaining representative performance insights.
+
+### Transaction Name Filtering
+
+Filter specific transactions by name using exact string matches or regular expressions:
+
+```ruby
+# Filter specific transactions by exact name
+SolidApm.transaction_filters += ['HomeController#index', /^Rails::HealthController/]
+```
 
 ## MCP Server
 

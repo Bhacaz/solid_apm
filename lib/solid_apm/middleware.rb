@@ -25,8 +25,7 @@ module SolidApm
       SpanSubscriber::Base.transaction = nil
 
       if transaction.nil? ||
-          transaction.name.start_with?('SolidApm::') ||
-          transaction.name.start_with?('ActionDispatch::Request::PASS_NOT_FOUND') ||
+          transaction_filtered?(transaction.name) ||
           !Sampler.should_sample?
 
         SpanSubscriber::Base.spans = nil
@@ -44,6 +43,19 @@ module SolidApm
         end
       end
       SpanSubscriber::Base.spans = nil
+    end
+
+    def self.transaction_filtered?(transaction_name)
+      SolidApm.transaction_filters.any? do |filter|
+        case filter
+        when String
+          transaction_name == filter
+        when Regexp
+          filter.match?(transaction_name)
+        else
+          false
+        end
+      end
     end
 
     def self.with_silence_logger
