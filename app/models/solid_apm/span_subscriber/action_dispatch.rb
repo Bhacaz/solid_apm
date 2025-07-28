@@ -3,7 +3,7 @@
 module SolidApm
   module SpanSubscriber
     class ActionDispatch < Base
-      PATTERN = /\w+\.action_dispatch/.freeze
+      PATTERN = 'request.action_dispatch'
       def self.subscribe
         super do |name, start, finish, id, payload|
           transaction = SpanSubscriber::Base.transaction

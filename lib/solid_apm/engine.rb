@@ -10,6 +10,14 @@ module SolidApm
       app.config.assets.precompile += %w( application.css application.js )
     end
 
+    # ActiveJob automatic instrumentation
+    initializer "solid_apm.active_job_instrumentation", after: :load_config_initializers do
+      ActiveSupport.on_load(:active_job) do
+        require 'solid_apm/active_job_instrumentation'
+        ActiveJob::Base.prepend(SolidApm::ActiveJobInstrumentation)
+      end
+    end
+
     begin
       # Mount the MCP server only if the main app added the fast_mcp in is Gemfile.
       require 'fast_mcp'
