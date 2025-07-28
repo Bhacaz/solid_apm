@@ -104,6 +104,29 @@ Filter specific transactions by name using exact string matches or regular expre
 SolidApm.transaction_filters += ['HomeController#index', /^Rails::HealthController/]
 ```
 
+## How it works
+
+SolidAPM stores information in the form of transactions, representing incoming HTTP requests which
+listen to a variety of spans (events) from `ActiveSupport::Instrument`. Each span
+saves backtrace information to easily find the source of issues.
+
+### Request transaction
+
+It is based on [ActionDispatch](https://guides.rubyonrails.org/active_support_instrumentation.html#action-dispatch)
+events to start and end a transaction.
+
+A Rack middleware uses [`rack.after_reply`](https://github.blog/engineering/architecture-optimization/performance-at-github-deferring-stats-with-rack-after_reply/)
+to bulk insert transactions and spans after delivering the response, so tracking your application
+doesn't add delay to the client.
+
+### Spans saved
+
+* Request
+* Rendering
+* SQL requests and transactions 
+* Rails cache
+* Net/HTTP
+
 ## MCP Server
 
 SolidAPM offers an optional MCP server to allow an AI agent to interact with SolidAPM
