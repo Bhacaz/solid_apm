@@ -3,9 +3,10 @@ require 'groupdate'
 require 'active_median'
 require 'apexcharts'
 
-require "solid_apm/version"
-require "solid_apm/engine"
-require "solid_apm/sampler"
+require 'solid_apm/version'
+require 'solid_apm/engine'
+require 'solid_apm/sampler'
+require 'solid_apm/cleanup_service'
 
 module SolidApm
   mattr_accessor :connects_to
