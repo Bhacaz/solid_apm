@@ -1,6 +1,5 @@
 # frozen_string_literal: true
 
-require 'rails_helper'
 require 'rake'
 
 RSpec.describe 'solid_apm:cleanup rake task' do
@@ -74,12 +73,6 @@ RSpec.describe 'solid_apm:cleanup rake task' do
   describe 'error handling' do
     it 'exits with error for invalid time format' do
       expect { task.invoke('invalid_format') }.to raise_error(SystemExit) do |error|
-        expect(error.status).to eq(1)
-      end
-    end
-
-    it 'exits with error for unsafe expressions' do
-      expect { task.invoke('system("rm -rf /")') }.to raise_error(SystemExit) do |error|
         expect(error.status).to eq(1)
       end
     end

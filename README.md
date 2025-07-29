@@ -123,11 +123,11 @@ Clean up transactions with custom time periods:
 bin/rails solid_apm:cleanup[1.week.ago]
 ```
 
-### Automated Cleanup with SolidQueue
+### Automated Cleanup with ActiveJob
 
-For production applications, it's recommended to set up automated cleanup using [SolidQueue's recurring tasks](https://github.com/rails/solid_queue?tab=readme-ov-file#recurring-tasks).
+For production applications, it's recommended to set up automated cleanup.
 
-Configure recurring cleanup in your `config/recurring.yml`:
+Example with SolidQueue. Configure recurring cleanup in your `config/recurring.yml`:
 
 ```yaml
 solid_apm_cleanup_weekly:

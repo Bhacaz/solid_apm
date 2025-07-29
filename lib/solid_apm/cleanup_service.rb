@@ -2,6 +2,8 @@
 
 module SolidApm
   class CleanupService
+    # Regex to match safe time expressions like "1.week.ago", "2.months.ago", etc.
+    DURATION_PATTERN = /\A(\d+)\.(second|minute|hour|day|week|month|year)s?\.ago\z/.freeze
     def initialize(older_than: '1.month.ago')
       @older_than = older_than
     end
@@ -23,7 +25,7 @@ module SolidApm
       # Regex to match safe time expressions like "1.week.ago", "2.months.ago", etc.
       pattern = /\A(\d+)\.(second|minute|hour|day|week|month|year)s?\.ago\z/
 
-      match = expression.match(pattern)
+      match = expression.match(DURATION_PATTERN)
       raise ArgumentError, 'Invalid time expression format' unless match
 
       number = match[1].to_i
