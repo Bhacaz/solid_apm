@@ -104,6 +104,38 @@ Filter specific transactions by name using exact string matches or regular expre
 SolidApm.transaction_filters += ['HomeController#index', /^Rails::HealthController/]
 ```
 
+## Data Cleanup
+
+SolidAPM provides a rake task to clean up old transaction data to manage database size over time.
+
+### Manual Cleanup
+
+Clean up transactions older than 1 month (default):
+
+```shell
+bin/rails solid_apm:cleanup
+```
+
+Clean up transactions with custom time periods:
+
+```shell
+# Delete transactions older than 1 week
+bin/rails solid_apm:cleanup[1.week.ago]
+```
+
+### Automated Cleanup with ActiveJob
+
+For production applications, it's recommended to set up automated cleanup.
+
+Example with SolidQueue. Configure recurring cleanup in your `config/recurring.yml`:
+
+```yaml
+solid_apm_cleanup_weekly:
+  class: SolidApm::CleanupJob  
+  cron: "0 3 * * *"   # Every day at 3 AM
+  args: ["1.week.ago"]
+```
+
 ## How it works
 
 SolidAPM stores information in the form of transactions, representing incoming HTTP requests which
