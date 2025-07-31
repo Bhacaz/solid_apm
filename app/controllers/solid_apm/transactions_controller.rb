@@ -68,11 +68,37 @@ module SolidApm
       if params[:from_timestamp].present? && params[:to_timestamp].present?
         from = Time.zone.at(params[:from_timestamp].to_i)
         to = Time.zone.at(params[:to_timestamp].to_i)
+      elsif params[:quick_range_apply].present?
+        to = Time.current
+        from = case params[:quick_range_apply]
+               when '5m'
+                 5.minutes.ago
+               when '15m'
+                 15.minutes.ago
+               when '30m'
+                 30.minutes.ago
+               when '1h'
+                 1.hour.ago
+               when '3h'
+                 3.hours.ago
+               when '6h'
+                 6.hours.ago
+               when '12h'
+                 12.hours.ago
+               when '24h'
+                 24.hours.ago
+               when '3d'
+                 3.days.ago
+               when '7d'
+                 7.days.ago
+               else
+                 1.hour.ago
+               end
       else
         params[:from_value] ||= 60
         params[:from_unit] ||= 'minutes'
         from = params[:from_value].to_i.public_send(params[:from_unit].to_sym).ago
-        params[:to_value] ||= 1
+        params[:to_value] ||= 0
         params[:to_unit] ||= 'seconds'
         to = params[:to_value].to_i.public_send(params[:to_unit].to_sym).ago
       end

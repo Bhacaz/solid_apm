@@ -13,3 +13,47 @@
  *= require_tree .
  *= require_self
  */
+
+/* Time Range Component Enhancements */
+#time-range-form .box {
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+#time-range-form .tabs ul {
+  border-bottom: 1px solid #dbdbdb;
+}
+
+#time-range-form .field.has-addons .control:not(:last-child) .input,
+#time-range-form .field.has-addons .control:not(:last-child) .select select {
+  border-right: none;
+}
+
+#time-range-form .field.has-addons .control:not(:first-child) .input,
+#time-range-form .field.has-addons .control:not(:first-child) .select select {
+  border-left: none;
+}
+
+#time-range-form .label.is-small {
+  font-size: 0.75rem;
+  margin-bottom: 0.25rem;
+}
+
+/* Chart Container Enhancements */
+#charts-container .level {
+  margin-bottom: 0.75rem;
+}
+
+#charts-container .tags.has-addons .tag {
+  font-size: 0.75rem;
+}
+
+/* Smooth transitions */
+#relative-panel,
+#absolute-panel,
+#custom-relative-range {
+  transition: opacity 0.2s ease-in-out;
+}
+
+.is-hidden {
+  display: none !important;
+}

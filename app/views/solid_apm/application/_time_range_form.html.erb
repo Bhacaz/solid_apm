@@ -1,34 +1,199 @@
-<%= form_with path: transactions_path, method: :get do |f| %>
-  <div class="is-flex is-flex-direction-row is-justify-content-center is-align-items-center" style="gap: 1em">
-    <%= f.number_field :from_value, value: params[:from_value] || 60, min: 1, class: 'input', style: 'width: 6em' %>
-    <div class="select">
-      <%= f.select :from_unit, {
-        "minutes" => "minutes",
-        "hours" => "hours",
-        "days" => "days",
-        "weeks" => "weeks",
-        "months" => "months",
-        "years" => "years"
-      }, {selected: params[:from_unit] || 'minutes' } %>
+<%= form_with path: transactions_path, method: :get, local: true, id: 'time-range-form' do |f| %>
+  <div class="box">
+    <div class="tabs is-boxed">
+      <ul>
+        <li class="<%= 'is-active' unless params[:from_timestamp].present? %>" id="relative-tab">
+          <a href="#" onclick="switchToRelative(event)">
+            <span>Relative</span>
+          </a>
+        </li>
+        <li class="<%= 'is-active' if params[:from_timestamp].present? %>" id="absolute-tab">
+          <a href="#" onclick="switchToAbsolute(event)">
+            <span>Absolute</span>
+          </a>
+        </li>
+      </ul>
     </div>
-    <b>→</b>
-    <%= f.number_field :to_value, value: params[:to_value] || 1, min: 1, class: 'input', style: 'width: 6em' %>
-    <div class="select">
-      <%= f.select :to_unit, {
-        "seconds" => "seconds",
-        "minutes" => "minutes",
-        "hours" => "hours",
-        "days" => "days",
-        "weeks" => "weeks",
-        "months" => "months",
-        "years" => "years"
-      }, {selected: params[:to_unit] || 'seconds' } %>
+
+    <!-- Relative Time Range Panel -->
+    <div id="relative-panel" class="<%= 'is-hidden' if params[:from_timestamp].present? %>">
+      <div class="field is-grouped is-grouped-centered is-align-items-end" style="flex-wrap: nowrap;">
+        <div class="control">
+          <div class="select">
+            <%= f.select :quick_range, {
+              "Last 5 minutes" => "5m",
+              "Last 15 minutes" => "15m",
+              "Last 30 minutes" => "30m",
+              "Last 1 hour" => "1h",
+              "Last 3 hours" => "3h",
+              "Last 6 hours" => "6h",
+              "Last 12 hours" => "12h",
+              "Last 24 hours" => "24h",
+              "Last 3 days" => "3d",
+              "Last 7 days" => "7d",
+              "Custom" => "custom"
+            }, {
+              selected: params[:quick_range] || (params[:from_value] && params[:from_unit] ? 'custom' : '1h'),
+              include_blank: false
+            }, {
+              class: 'select-input',
+              onchange: 'handleQuickRangeChange(this)'
+            } %>
+          </div>
+        </div>
+
+        <div class="control <% unless params[:quick_range] == 'custom' || (params[:from_value] && params[:from_unit] && !params[:from_timestamp].present?) %>is-hidden<% end %>" id="custom-from-control">
+          <label class="label is-small">From</label>
+          <div class="field has-addons">
+            <div class="control">
+              <%= f.number_field :from_value, value: params[:from_value] || 60, min: 1, class: 'input has-text-centered', style: 'width: 3.5em' %>
+            </div>
+            <div class="control">
+              <div class="select">
+                <%= f.select :from_unit, [
+                  "minutes",
+                  "hours",
+                  "days",
+                  "weeks",
+                  "months"
+                ], {selected: params[:from_unit] || 'minutes' } %>
+              </div>
+            </div>
+            <div class="control">
+              <span class="button is-static">ago</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="control <% unless params[:quick_range] == 'custom' || (params[:from_value] && params[:from_unit] && !params[:from_timestamp].present?) %>is-hidden<% end %>" id="custom-to-control">
+          <label class="label is-small">To</label>
+          <div class="field has-addons">
+            <div class="control">
+              <%= f.number_field :to_value, value: params[:to_value] || 0, min: 0, class: 'input has-text-centered', style: 'width: 3.5em' %>
+            </div>
+            <div class="control">
+              <div class="select">
+                <%= f.select :to_unit, [
+                  "seconds",
+                  "minutes",
+                  "hours",
+                  "days",
+                  "weeks"
+                ], {selected: params[:to_unit] || 'seconds' } %>
+              </div>
+            </div>
+            <div class="control">
+              <span class="button is-static">ago</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="control">
+          <%= f.submit 'Apply', class: 'button is-primary' %>
+        </div>
+      </div>
     </div>
 
     <% if params[:name] %>
       <%= f.hidden_field :name, value: params[:name] %>
     <% end %>
 
-    <%= f.submit 'Apply', class: 'button' %>
+    <!-- Absolute Time Range Panel -->
+    <div id="absolute-panel" class="<%= 'is-hidden' unless params[:from_timestamp].present? %>">
+      <div class="field is-grouped is-grouped-centered is-align-items-end">
+        <div class="control">
+          <label class="label is-small">From</label>
+          <%= f.datetime_local_field :from_datetime, 
+                value: (params[:from_timestamp] ? Time.zone.at(params[:from_timestamp].to_i).strftime('%Y-%m-%dT%H:%M') : 1.hour.ago.strftime('%Y-%m-%dT%H:%M')),
+                class: 'input' %>
+        </div>
+        <div class="control">
+          <label class="label is-small">To</label>
+          <%= f.datetime_local_field :to_datetime, 
+                value: (params[:to_timestamp] ? Time.zone.at(params[:to_timestamp].to_i).strftime('%Y-%m-%dT%H:%M') : Time.current.strftime('%Y-%m-%dT%H:%M')),
+                class: 'input' %>
+        </div>
+        <div class="control">
+          <%= f.submit 'Apply', class: 'button is-primary' %>
+        </div>
+      </div>
+    </div>
   </div>
 <% end %>
+
+<script>
+function switchToRelative(event) {
+  event.preventDefault();
+  document.getElementById('relative-tab').classList.add('is-active');
+  document.getElementById('absolute-tab').classList.remove('is-active');
+  document.getElementById('relative-panel').classList.remove('is-hidden');
+  document.getElementById('absolute-panel').classList.add('is-hidden');
+  
+  // Clear absolute timestamp fields
+  document.querySelector('[name="from_timestamp"]')?.remove();
+  document.querySelector('[name="to_timestamp"]')?.remove();
+}
+
+function switchToAbsolute(event) {
+  event.preventDefault();
+  document.getElementById('absolute-tab').classList.add('is-active');
+  document.getElementById('relative-tab').classList.remove('is-active');
+  document.getElementById('absolute-panel').classList.remove('is-hidden');
+  document.getElementById('relative-panel').classList.add('is-hidden');
+}
+
+function handleQuickRangeChange(select) {
+  const fromControl = document.getElementById('custom-from-control');
+  const toControl = document.getElementById('custom-to-control');
+  if (select.value === 'custom') {
+    fromControl.classList.remove('is-hidden');
+    toControl.classList.remove('is-hidden');
+  } else {
+    fromControl.classList.add('is-hidden');
+    toControl.classList.add('is-hidden');
+    // Auto-submit when a preset is selected
+    applyQuickRange();
+  }
+}
+
+function applyQuickRange() {
+  const quickRange = document.querySelector('[name="quick_range"]').value;
+  if (quickRange === 'custom') return;
+  
+  const form = document.getElementById('time-range-form');
+  const input = document.createElement('input');
+  input.type = 'hidden';
+  input.name = 'quick_range_apply';
+  input.value = quickRange;
+  form.appendChild(input);
+  form.submit();
+}
+
+// Handle absolute datetime conversion on form submit
+document.getElementById('time-range-form').addEventListener('submit', function(e) {
+  const absolutePanel = document.getElementById('absolute-panel');
+  if (!absolutePanel.classList.contains('is-hidden')) {
+    const fromDatetime = document.querySelector('[name="from_datetime"]').value;
+    const toDatetime = document.querySelector('[name="to_datetime"]').value;
+    
+    if (fromDatetime && toDatetime) {
+      // Convert to timestamps
+      const fromTimestamp = Math.floor(new Date(fromDatetime).getTime() / 1000);
+      const toTimestamp = Math.floor(new Date(toDatetime).getTime() / 1000);
+      
+      // Add hidden fields
+      const fromInput = document.createElement('input');
+      fromInput.type = 'hidden';
+      fromInput.name = 'from_timestamp';
+      fromInput.value = fromTimestamp;
+      this.appendChild(fromInput);
+      
+      const toInput = document.createElement('input');
+      toInput.type = 'hidden';
+      toInput.name = 'to_timestamp';
+      toInput.value = toTimestamp;
+      this.appendChild(toInput);
+    }
+  }
+});
+</script>
