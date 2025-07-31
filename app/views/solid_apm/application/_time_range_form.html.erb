@@ -1,18 +1,15 @@
 <%= form_with path: transactions_path, method: :get, local: true, id: 'time-range-form' do |f| %>
-  <div class="box">
-    <div class="tabs is-boxed">
-      <ul>
-        <li class="<%= 'is-active' unless params[:from_timestamp].present? %>" id="relative-tab">
-          <a href="#" onclick="switchToRelative(event)">
-            <span>Relative</span>
-          </a>
-        </li>
-        <li class="<%= 'is-active' if params[:from_timestamp].present? %>" id="absolute-tab">
-          <a href="#" onclick="switchToAbsolute(event)">
-            <span>Absolute</span>
-          </a>
-        </li>
-      </ul>
+    <div class="field is-grouped is-justify-content-center" style="margin-bottom: 1rem;">
+      <div class="control">
+        <div class="buttons has-addons">
+          <button type="button" class="button is-small <%= 'is-primary' unless params[:from_timestamp].present? %>" id="relative-tab" onclick="switchToRelative(event)">
+            Relative
+          </button>
+          <button type="button" class="button is-small <%= 'is-primary' if params[:from_timestamp].present? %>" id="absolute-tab" onclick="switchToAbsolute(event)">
+            Absolute
+          </button>
+        </div>
+      </div>
     </div>
 
     <!-- Relative Time Range Panel -->
@@ -42,7 +39,7 @@
           </div>
         </div>
 
-        <div class="control <% unless params[:quick_range] == 'custom' || (params[:from_value] && params[:from_unit] && !params[:from_timestamp].present?) %>is-hidden<% end %>" id="custom-from-control">
+        <div class="control <% unless params[:quick_range] == 'custom' %>is-hidden<% end %>" id="custom-from-control">
           <label class="label is-small">From</label>
           <div class="field has-addons">
             <div class="control">
@@ -65,7 +62,7 @@
           </div>
         </div>
 
-        <div class="control <% unless params[:quick_range] == 'custom' || (params[:from_value] && params[:from_unit] && !params[:from_timestamp].present?) %>is-hidden<% end %>" id="custom-to-control">
+        <div class="control <% unless params[:quick_range] == 'custom' %>is-hidden<% end %>" id="custom-to-control">
           <label class="label is-small">To</label>
           <div class="field has-addons">
             <div class="control">
@@ -118,28 +115,55 @@
         </div>
       </div>
     </div>
-  </div>
 <% end %>
 
 <script>
 function switchToRelative(event) {
   event.preventDefault();
-  document.getElementById('relative-tab').classList.add('is-active');
-  document.getElementById('absolute-tab').classList.remove('is-active');
+  const relativeTab = document.getElementById('relative-tab');
+  const absoluteTab = document.getElementById('absolute-tab');
+  
+  relativeTab.classList.add('is-primary');
+  absoluteTab.classList.remove('is-primary');
+  
   document.getElementById('relative-panel').classList.remove('is-hidden');
   document.getElementById('absolute-panel').classList.add('is-hidden');
   
   // Clear absolute timestamp fields
   document.querySelector('[name="from_timestamp"]')?.remove();
   document.querySelector('[name="to_timestamp"]')?.remove();
+  
+  // Clean up URL parameters when switching to relative mode
+  const url = new URL(window.location);
+  const absoluteParams = ['from_timestamp', 'to_timestamp', 'from_datetime', 'to_datetime'];
+  absoluteParams.forEach(param => {
+    url.searchParams.delete(param);
+  });
+  
+  // Update URL without page reload
+  window.history.replaceState({}, '', url);
 }
 
 function switchToAbsolute(event) {
   event.preventDefault();
-  document.getElementById('absolute-tab').classList.add('is-active');
-  document.getElementById('relative-tab').classList.remove('is-active');
+  const relativeTab = document.getElementById('relative-tab');
+  const absoluteTab = document.getElementById('absolute-tab');
+  
+  absoluteTab.classList.add('is-primary');
+  relativeTab.classList.remove('is-primary');
+  
   document.getElementById('absolute-panel').classList.remove('is-hidden');
   document.getElementById('relative-panel').classList.add('is-hidden');
+  
+  // Clean up URL parameters when switching to absolute mode
+  const url = new URL(window.location);
+  const relativeParams = ['quick_range', 'from_value', 'from_unit', 'to_value', 'to_unit', 'quick_range_apply'];
+  relativeParams.forEach(param => {
+    url.searchParams.delete(param);
+  });
+  
+  // Update URL without page reload
+  window.history.replaceState({}, '', url);
 }
 
 function handleQuickRangeChange(select) {
@@ -161,18 +185,31 @@ function applyQuickRange() {
   if (quickRange === 'custom') return;
   
   const form = document.getElementById('time-range-form');
+  
+  // Remove any absolute mode parameters before submitting
+  const absoluteParams = ['from_datetime', 'to_datetime', 'from_timestamp', 'to_timestamp'];
+  absoluteParams.forEach(param => {
+    const fields = form.querySelectorAll(`[name="${param}"]`);
+    fields.forEach(field => field.remove());
+  });
+  
+  // Add the quick range parameter
   const input = document.createElement('input');
   input.type = 'hidden';
   input.name = 'quick_range_apply';
   input.value = quickRange;
   form.appendChild(input);
+  
   form.submit();
 }
 
-// Handle absolute datetime conversion on form submit
+// Handle form submission and clean up parameters based on active mode
 document.getElementById('time-range-form').addEventListener('submit', function(e) {
   const absolutePanel = document.getElementById('absolute-panel');
+  const relativePanel = document.getElementById('relative-panel');
+  
   if (!absolutePanel.classList.contains('is-hidden')) {
+    // ABSOLUTE MODE: Only send timestamp parameters
     const fromDatetime = document.querySelector('[name="from_datetime"]').value;
     const toDatetime = document.querySelector('[name="to_datetime"]').value;
     
@@ -181,7 +218,11 @@ document.getElementById('time-range-form').addEventListener('submit', function(e
       const fromTimestamp = Math.floor(new Date(fromDatetime).getTime() / 1000);
       const toTimestamp = Math.floor(new Date(toDatetime).getTime() / 1000);
       
-      // Add hidden fields
+      // Disable datetime fields so they don't get submitted
+      document.querySelector('[name="from_datetime"]').disabled = true;
+      document.querySelector('[name="to_datetime"]').disabled = true;
+      
+      // Add hidden timestamp fields
       const fromInput = document.createElement('input');
       fromInput.type = 'hidden';
       fromInput.name = 'from_timestamp';
@@ -193,7 +234,21 @@ document.getElementById('time-range-form').addEventListener('submit', function(e
       toInput.name = 'to_timestamp';
       toInput.value = toTimestamp;
       this.appendChild(toInput);
+      
+      // Remove relative mode parameters
+      const relativeParams = ['quick_range', 'from_value', 'from_unit', 'to_value', 'to_unit', 'quick_range_apply'];
+      relativeParams.forEach(param => {
+        const fields = this.querySelectorAll(`[name="${param}"]`);
+        fields.forEach(field => field.remove());
+      });
     }
+  } else if (!relativePanel.classList.contains('is-hidden')) {
+    // RELATIVE MODE: Remove absolute mode parameters
+    const absoluteParams = ['from_datetime', 'to_datetime', 'from_timestamp', 'to_timestamp'];
+    absoluteParams.forEach(param => {
+      const fields = this.querySelectorAll(`[name="${param}"]`);
+      fields.forEach(field => field.remove());
+    });
   }
 });
 </script>
