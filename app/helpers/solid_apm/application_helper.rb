@@ -23,29 +23,65 @@ module SolidApm
       {
         module: true,
         chart: {
-          type: 'area', height: '200', background: '0', foreColor: '#ffffff55', zoom: {
-            enabled: false,
-          }, toolbar: {
-            show: false,
+          type: 'area',
+          height: '200',
+          background: '0',
+          foreColor: '#ffffff55',
+          zoom: {
+            enabled: true,
+            autoScaleYaxis: true
+          },
+          selection: {
+            enabled: true,
+            type: 'x'
+          },
+          toolbar: {
+            show: false
+          },
+          events: {
+            zoomed: {
+              function: {
+                args: 'chartContext, { xaxis, yaxis }',
+                body: 'handleChartSelection(xaxis.min, xaxis.max)'
+              }
+            },
+            selection: {
+              function: {
+                args: 'chartContext, { xaxis, yaxis }',
+                body: 'handleChartSelection(xaxis.min, xaxis.max)'
+              }
+            }
           }
         },
         xaxis: {
-        type: 'datetime',
-        tooltip: {
-          enabled: false
-
-        }
-      },
+          type: 'datetime',
+          tooltip: {
+            enabled: false
+          }
+        },
         stroke: {
-        curve: 'smooth'
-      }, theme: {
-        mode: 'dark',
-      }, grid: {
-        show: true, borderColor: '#ffffff55',
-      }, dataLabels: {
-        enabled: false
-      },
-       tooltip: {x: {formatter: {function: {args: "val", body: "return new Date(val).toLocaleString()"}} }}
+          curve: 'smooth'
+        },
+        theme: {
+          mode: 'dark'
+        },
+        grid: {
+          show: true,
+          borderColor: '#ffffff55'
+        },
+        dataLabels: {
+          enabled: false
+        },
+        tooltip: {
+          x: {
+            formatter: {
+              function: {
+                args: 'val',
+                body: 'return new Date(val).toLocaleString()'
+              }
+            }
+          }
+        }
       }
     end
   end
