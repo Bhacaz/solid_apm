@@ -1,59 +1,66 @@
+<%
+  is_absolute_mode = params[:from_timestamp].present?
+  is_custom_range = (params[:quick_range].blank? && params[:from_value] && params[:from_unit]) || params[:quick_range] == 'custom'
+  
+  time_ranges = {
+    "Last 5 minutes" => "5m", "Last 15 minutes" => "15m", "Last 30 minutes" => "30m",
+    "Last 1 hour" => "1h", "Last 3 hours" => "3h", "Last 6 hours" => "6h", 
+    "Last 12 hours" => "12h", "Last 24 hours" => "24h", "Last 3 days" => "3d",
+    "Last 7 days" => "7d", "Custom" => "custom"
+  }
+  
+  time_units = %w[minutes hours days weeks months]
+  to_time_units = %w[seconds minutes hours days weeks]
+%>
+
 <%= form_with path: transactions_path, method: :get, local: true, id: 'time-range-form' do |f| %>
-    <div class="field is-grouped is-justify-content-center" style="margin-bottom: 1rem;">
+  <div class="field is-grouped is-justify-content-center" style="margin-bottom: 1rem;">
+    <div class="control">
+      <div class="buttons has-addons">
+        <% [['Relative', !is_absolute_mode], ['Absolute', is_absolute_mode]].each do |label, is_active| %>
+          <button type="button" 
+                  class="button is-small <%= 'is-primary' if is_active %>" 
+                  id="<%= label.downcase %>-tab" 
+                  onclick="switchTo<%= label %>(event)">
+            <%= label %>
+          </button>
+        <% end %>
+      </div>
+    </div>
+  </div>
+
+  <div id="relative-panel" class="<%= 'is-hidden' if is_absolute_mode %>">
+    <div class="field is-grouped is-grouped-centered is-align-items-end" style="flex-wrap: nowrap;">
       <div class="control">
-        <div class="buttons has-addons">
-          <button type="button" class="button is-small <%= 'is-primary' unless params[:from_timestamp].present? %>" id="relative-tab" onclick="switchToRelative(event)">
-            Relative
-          </button>
-          <button type="button" class="button is-small <%= 'is-primary' if params[:from_timestamp].present? %>" id="absolute-tab" onclick="switchToAbsolute(event)">
-            Absolute
-          </button>
+        <div class="select">
+          <%= f.select :quick_range, time_ranges, {
+            selected: params[:quick_range] || (is_custom_range ? 'custom' : '1h'),
+            include_blank: false
+          }, {
+            class: 'select-input',
+            onchange: 'handleQuickRangeChange(this)'
+          } %>
         </div>
       </div>
-    </div>
 
-    <!-- Relative Time Range Panel -->
-    <div id="relative-panel" class="<%= 'is-hidden' if params[:from_timestamp].present? %>">
-      <div class="field is-grouped is-grouped-centered is-align-items-end" style="flex-wrap: nowrap;">
-        <div class="control">
-          <div class="select">
-            <%= f.select :quick_range, {
-              "Last 5 minutes" => "5m",
-              "Last 15 minutes" => "15m",
-              "Last 30 minutes" => "30m",
-              "Last 1 hour" => "1h",
-              "Last 3 hours" => "3h",
-              "Last 6 hours" => "6h",
-              "Last 12 hours" => "12h",
-              "Last 24 hours" => "24h",
-              "Last 3 days" => "3d",
-              "Last 7 days" => "7d",
-              "Custom" => "custom"
-            }, {
-              selected: params[:quick_range] || (params[:from_value] && params[:from_unit] ? 'custom' : '1h'),
-              include_blank: false
-            }, {
-              class: 'select-input',
-              onchange: 'handleQuickRangeChange(this)'
-            } %>
-          </div>
-        </div>
-
-        <div class="control <% unless params[:quick_range] == 'custom' %>is-hidden<% end %>" id="custom-from-control">
-          <label class="label is-small">From</label>
+      <% [
+        { field: :from_value, default: 60, min: 1, units: time_units, default_unit: 'minutes', label: 'From', id: 'custom-from-control' },
+        { field: :to_value, default: 0, min: 0, units: to_time_units, default_unit: 'seconds', label: 'To', id: 'custom-to-control' }
+      ].each do |config| %>
+        <div class="control <%= 'is-hidden' unless is_custom_range %>" id="<%= config[:id] %>">
+          <label class="label is-small"><%= config[:label] %></label>
           <div class="field has-addons">
             <div class="control">
-              <%= f.number_field :from_value, value: params[:from_value] || 60, min: 1, class: 'input has-text-centered', style: 'width: 3.5em' %>
+              <%= f.number_field config[:field], 
+                    value: params[config[:field]] || config[:default], 
+                    min: config[:min], 
+                    class: 'input has-text-centered', 
+                    style: 'width: 3.5em' %>
             </div>
             <div class="control">
               <div class="select">
-                <%= f.select :from_unit, [
-                  "minutes",
-                  "hours",
-                  "days",
-                  "weeks",
-                  "months"
-                ], {selected: params[:from_unit] || 'minutes' } %>
+                <%= f.select "#{config[:field].to_s.split('_')[0]}_unit", config[:units], 
+                           { selected: params["#{config[:field].to_s.split('_')[0]}_unit"] || config[:default_unit] } %>
               </div>
             </div>
             <div class="control">
@@ -61,194 +68,33 @@
             </div>
           </div>
         </div>
+      <% end %>
 
-        <div class="control <% unless params[:quick_range] == 'custom' %>is-hidden<% end %>" id="custom-to-control">
-          <label class="label is-small">To</label>
-          <div class="field has-addons">
-            <div class="control">
-              <%= f.number_field :to_value, value: params[:to_value] || 0, min: 0, class: 'input has-text-centered', style: 'width: 3.5em' %>
-            </div>
-            <div class="control">
-              <div class="select">
-                <%= f.select :to_unit, [
-                  "seconds",
-                  "minutes",
-                  "hours",
-                  "days",
-                  "weeks"
-                ], {selected: params[:to_unit] || 'seconds' } %>
-              </div>
-            </div>
-            <div class="control">
-              <span class="button is-static">ago</span>
-            </div>
-          </div>
-        </div>
-
-        <div class="control">
-          <%= f.submit 'Apply', class: 'button is-primary' %>
-        </div>
+      <div class="control">
+        <%= f.submit 'Apply', class: 'button is-primary' %>
       </div>
     </div>
+  </div>
 
-    <% if params[:name] %>
-      <%= f.hidden_field :name, value: params[:name] %>
-    <% end %>
+  <%= f.hidden_field :name, value: params[:name] if params[:name] %>
 
-    <!-- Absolute Time Range Panel -->
-    <div id="absolute-panel" class="<%= 'is-hidden' unless params[:from_timestamp].present? %>">
-      <div class="field is-grouped is-grouped-centered is-align-items-end">
+  <div id="absolute-panel" class="<%= 'is-hidden' unless is_absolute_mode %>">
+    <div class="field is-grouped is-grouped-centered is-align-items-end">
+      <% [['from', 1.hour.ago], ['to', Time.current]].each do |prefix, default_time| %>
         <div class="control">
-          <label class="label is-small">From</label>
-          <%= f.datetime_local_field :from_datetime, 
-                value: (params[:from_timestamp] ? Time.zone.at(params[:from_timestamp].to_i).strftime('%Y-%m-%dT%H:%M') : 1.hour.ago.strftime('%Y-%m-%dT%H:%M')),
+          <label class="label is-small"><%= prefix.capitalize %></label>
+          <%= f.datetime_local_field "#{prefix}_datetime", 
+                value: (params["#{prefix}_timestamp"] ? 
+                        Time.zone.at(params["#{prefix}_timestamp"].to_i).strftime('%Y-%m-%dT%H:%M') : 
+                        default_time.strftime('%Y-%m-%dT%H:%M')),
                 class: 'input' %>
         </div>
-        <div class="control">
-          <label class="label is-small">To</label>
-          <%= f.datetime_local_field :to_datetime, 
-                value: (params[:to_timestamp] ? Time.zone.at(params[:to_timestamp].to_i).strftime('%Y-%m-%dT%H:%M') : Time.current.strftime('%Y-%m-%dT%H:%M')),
-                class: 'input' %>
-        </div>
-        <div class="control">
-          <%= f.submit 'Apply', class: 'button is-primary' %>
-        </div>
+      <% end %>
+      <div class="control">
+        <%= f.submit 'Apply', class: 'button is-primary' %>
       </div>
     </div>
+  </div>
 <% end %>
 
-<script>
-function switchToRelative(event) {
-  event.preventDefault();
-  const relativeTab = document.getElementById('relative-tab');
-  const absoluteTab = document.getElementById('absolute-tab');
-  
-  relativeTab.classList.add('is-primary');
-  absoluteTab.classList.remove('is-primary');
-  
-  document.getElementById('relative-panel').classList.remove('is-hidden');
-  document.getElementById('absolute-panel').classList.add('is-hidden');
-  
-  // Clear absolute timestamp fields
-  document.querySelector('[name="from_timestamp"]')?.remove();
-  document.querySelector('[name="to_timestamp"]')?.remove();
-  
-  // Clean up URL parameters when switching to relative mode
-  const url = new URL(window.location);
-  const absoluteParams = ['from_timestamp', 'to_timestamp', 'from_datetime', 'to_datetime'];
-  absoluteParams.forEach(param => {
-    url.searchParams.delete(param);
-  });
-  
-  // Update URL without page reload
-  window.history.replaceState({}, '', url);
-}
-
-function switchToAbsolute(event) {
-  event.preventDefault();
-  const relativeTab = document.getElementById('relative-tab');
-  const absoluteTab = document.getElementById('absolute-tab');
-  
-  absoluteTab.classList.add('is-primary');
-  relativeTab.classList.remove('is-primary');
-  
-  document.getElementById('absolute-panel').classList.remove('is-hidden');
-  document.getElementById('relative-panel').classList.add('is-hidden');
-  
-  // Clean up URL parameters when switching to absolute mode
-  const url = new URL(window.location);
-  const relativeParams = ['quick_range', 'from_value', 'from_unit', 'to_value', 'to_unit', 'quick_range_apply'];
-  relativeParams.forEach(param => {
-    url.searchParams.delete(param);
-  });
-  
-  // Update URL without page reload
-  window.history.replaceState({}, '', url);
-}
-
-function handleQuickRangeChange(select) {
-  const fromControl = document.getElementById('custom-from-control');
-  const toControl = document.getElementById('custom-to-control');
-  if (select.value === 'custom') {
-    fromControl.classList.remove('is-hidden');
-    toControl.classList.remove('is-hidden');
-  } else {
-    fromControl.classList.add('is-hidden');
-    toControl.classList.add('is-hidden');
-    // Auto-submit when a preset is selected
-    applyQuickRange();
-  }
-}
-
-function applyQuickRange() {
-  const quickRange = document.querySelector('[name="quick_range"]').value;
-  if (quickRange === 'custom') return;
-  
-  const form = document.getElementById('time-range-form');
-  
-  // Remove any absolute mode parameters before submitting
-  const absoluteParams = ['from_datetime', 'to_datetime', 'from_timestamp', 'to_timestamp'];
-  absoluteParams.forEach(param => {
-    const fields = form.querySelectorAll(`[name="${param}"]`);
-    fields.forEach(field => field.remove());
-  });
-  
-  // Add the quick range parameter
-  const input = document.createElement('input');
-  input.type = 'hidden';
-  input.name = 'quick_range_apply';
-  input.value = quickRange;
-  form.appendChild(input);
-  
-  form.submit();
-}
-
-// Handle form submission and clean up parameters based on active mode
-document.getElementById('time-range-form').addEventListener('submit', function(e) {
-  const absolutePanel = document.getElementById('absolute-panel');
-  const relativePanel = document.getElementById('relative-panel');
-  
-  if (!absolutePanel.classList.contains('is-hidden')) {
-    // ABSOLUTE MODE: Only send timestamp parameters
-    const fromDatetime = document.querySelector('[name="from_datetime"]').value;
-    const toDatetime = document.querySelector('[name="to_datetime"]').value;
-    
-    if (fromDatetime && toDatetime) {
-      // Convert to timestamps
-      const fromTimestamp = Math.floor(new Date(fromDatetime).getTime() / 1000);
-      const toTimestamp = Math.floor(new Date(toDatetime).getTime() / 1000);
-      
-      // Disable datetime fields so they don't get submitted
-      document.querySelector('[name="from_datetime"]').disabled = true;
-      document.querySelector('[name="to_datetime"]').disabled = true;
-      
-      // Add hidden timestamp fields
-      const fromInput = document.createElement('input');
-      fromInput.type = 'hidden';
-      fromInput.name = 'from_timestamp';
-      fromInput.value = fromTimestamp;
-      this.appendChild(fromInput);
-      
-      const toInput = document.createElement('input');
-      toInput.type = 'hidden';
-      toInput.name = 'to_timestamp';
-      toInput.value = toTimestamp;
-      this.appendChild(toInput);
-      
-      // Remove relative mode parameters
-      const relativeParams = ['quick_range', 'from_value', 'from_unit', 'to_value', 'to_unit', 'quick_range_apply'];
-      relativeParams.forEach(param => {
-        const fields = this.querySelectorAll(`[name="${param}"]`);
-        fields.forEach(field => field.remove());
-      });
-    }
-  } else if (!relativePanel.classList.contains('is-hidden')) {
-    // RELATIVE MODE: Remove absolute mode parameters
-    const absoluteParams = ['from_datetime', 'to_datetime', 'from_timestamp', 'to_timestamp'];
-    absoluteParams.forEach(param => {
-      const fields = this.querySelectorAll(`[name="${param}"]`);
-      fields.forEach(field => field.remove());
-    });
-  }
-});
-</script>
+<%= javascript_include_tag 'solid_apm/time_range_form' %>

@@ -1,0 +1,169 @@
+class TimeRangeForm {
+  constructor() {
+    this.form = document.getElementById('time-range-form');
+    this.relativeTab = document.getElementById('relative-tab');
+    this.absoluteTab = document.getElementById('absolute-tab');
+    this.relativePanel = document.getElementById('relative-panel');
+    this.absolutePanel = document.getElementById('absolute-panel');
+    this.customFromControl = document.getElementById('custom-from-control');
+    this.customToControl = document.getElementById('custom-to-control');
+    
+    this.init();
+  }
+  
+  init() {
+    this.setupEventListeners();
+    this.initializeFormState();
+  }
+  
+  setupEventListeners() {
+    if (this.form) {
+      this.form.addEventListener('submit', (e) => this.handleFormSubmit(e));
+    }
+  }
+  
+  switchToRelative(event) {
+    event.preventDefault();
+    
+    this.relativeTab.classList.add('is-primary');
+    this.absoluteTab.classList.remove('is-primary');
+    this.relativePanel.classList.remove('is-hidden');
+    this.absolutePanel.classList.add('is-hidden');
+    
+    this.removeFields(['from_timestamp', 'to_timestamp']);
+    this.cleanupUrlParams(['from_timestamp', 'to_timestamp', 'from_datetime', 'to_datetime']);
+  }
+  
+  switchToAbsolute(event) {
+    event.preventDefault();
+    
+    this.absoluteTab.classList.add('is-primary');
+    this.relativeTab.classList.remove('is-primary');
+    this.absolutePanel.classList.remove('is-hidden');
+    this.relativePanel.classList.add('is-hidden');
+    
+    this.cleanupUrlParams(['quick_range', 'from_value', 'from_unit', 'to_value', 'to_unit', 'quick_range_apply']);
+  }
+  
+  handleQuickRangeChange(select) {
+    const isCustom = select.value === 'custom';
+    
+    this.toggleVisibility(this.customFromControl, isCustom);
+    this.toggleVisibility(this.customToControl, isCustom);
+    
+    if (!isCustom) {
+      this.applyQuickRange();
+    }
+  }
+  
+  applyQuickRange() {
+    const quickRangeSelect = this.form.querySelector('[name="quick_range"]');
+    if (!quickRangeSelect || quickRangeSelect.value === 'custom') return;
+    
+    this.removeFields(['from_datetime', 'to_datetime', 'from_timestamp', 'to_timestamp']);
+    this.addHiddenField('quick_range_apply', quickRangeSelect.value);
+    this.form.submit();
+  }
+  
+  handleFormSubmit(event) {
+    const isAbsoluteMode = !this.absolutePanel.classList.contains('is-hidden');
+    
+    if (isAbsoluteMode) {
+      this.handleAbsoluteModeSubmit();
+    } else {
+      this.handleRelativeModeSubmit();
+    }
+  }
+  
+  handleAbsoluteModeSubmit() {
+    const fromDatetime = this.form.querySelector('[name="from_datetime"]');
+    const toDatetime = this.form.querySelector('[name="to_datetime"]');
+    
+    if (fromDatetime?.value && toDatetime?.value) {
+      const fromTimestamp = Math.floor(new Date(fromDatetime.value).getTime() / 1000);
+      const toTimestamp = Math.floor(new Date(toDatetime.value).getTime() / 1000);
+      
+      fromDatetime.disabled = true;
+      toDatetime.disabled = true;
+      
+      this.addHiddenField('from_timestamp', fromTimestamp);
+      this.addHiddenField('to_timestamp', toTimestamp);
+      this.removeFields(['quick_range', 'from_value', 'from_unit', 'to_value', 'to_unit', 'quick_range_apply']);
+    }
+  }
+  
+  handleRelativeModeSubmit() {
+    const quickRangeSelect = this.form.querySelector('[name="quick_range"]');
+    const quickRangeValue = quickRangeSelect?.value;
+    
+    if (quickRangeValue && quickRangeValue !== 'custom') {
+      this.removeFields(['from_value', 'from_unit', 'to_value', 'to_unit']);
+    } else {
+      this.removeFields(['quick_range', 'quick_range_apply']);
+    }
+    
+    this.removeFields(['from_datetime', 'to_datetime', 'from_timestamp', 'to_timestamp']);
+  }
+  
+  initializeFormState() {
+    const urlParams = new URLSearchParams(window.location.search);
+    const hasCustomParams = urlParams.has('from_value') && urlParams.has('from_unit');
+    const hasQuickRange = urlParams.has('quick_range');
+    const quickRangeSelect = this.form.querySelector('[name="quick_range"]');
+    
+    if (hasQuickRange && !hasCustomParams) {
+      this.toggleVisibility(this.customFromControl, false);
+      this.toggleVisibility(this.customToControl, false);
+    } else if (hasCustomParams && !hasQuickRange) {
+      if (quickRangeSelect) quickRangeSelect.value = 'custom';
+      this.toggleVisibility(this.customFromControl, true);
+      this.toggleVisibility(this.customToControl, true);
+    }
+  }
+  
+  // Utility methods
+  removeFields(fieldNames) {
+    fieldNames.forEach(name => {
+      this.form.querySelectorAll(`[name="${name}"]`).forEach(field => field.remove());
+    });
+  }
+  
+  addHiddenField(name, value) {
+    const input = document.createElement('input');
+    input.type = 'hidden';
+    input.name = name;
+    input.value = value;
+    this.form.appendChild(input);
+  }
+  
+  toggleVisibility(element, show) {
+    if (!element) return;
+    element.classList.toggle('is-hidden', !show);
+  }
+  
+  cleanupUrlParams(params) {
+    const url = new URL(window.location);
+    params.forEach(param => url.searchParams.delete(param));
+    window.history.replaceState({}, '', url);
+  }
+}
+
+// Global functions for onclick handlers (maintaining backward compatibility)
+let timeRangeFormInstance;
+
+function switchToRelative(event) {
+  timeRangeFormInstance?.switchToRelative(event);
+}
+
+function switchToAbsolute(event) {
+  timeRangeFormInstance?.switchToAbsolute(event);
+}
+
+function handleQuickRangeChange(select) {
+  timeRangeFormInstance?.handleQuickRangeChange(select);
+}
+
+// Initialize when DOM is ready
+document.addEventListener('DOMContentLoaded', function() {
+  timeRangeFormInstance = new TimeRangeForm();
+});
