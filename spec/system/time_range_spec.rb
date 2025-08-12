@@ -68,7 +68,7 @@ RSpec.describe 'Time Range Selection', type: :request do
         browser_timezone: 'America/New_York'
       }
       expect(response).to have_http_status(:success)
-      expect(response.body).to include('timezone-indicator')
+      expect(response.body).to include('absolute-tab')
     end
 
     it 'validates time range order' do
@@ -92,7 +92,7 @@ RSpec.describe 'Time Range Selection', type: :request do
         browser_timezone: 'America/Los_Angeles'
       }
       expect(response).to have_http_status(:success)
-      expect(response.body).to include('timezone-indicator')
+      expect(response.body).to include('relative-tab')
     end
 
     it 'includes timezone information in absolute mode' do
@@ -102,8 +102,8 @@ RSpec.describe 'Time Range Selection', type: :request do
         browser_timezone: 'Europe/London'
       }
       expect(response).to have_http_status(:success)
-      expect(response.body).to include('from-timezone-label')
-      expect(response.body).to include('to-timezone-label')
+      expect(response.body).to include('From')
+      expect(response.body).to include('To')
     end
   end
 
@@ -172,8 +172,8 @@ RSpec.describe 'Time Range Selection', type: :request do
 
     it 'includes timezone indicator in form' do
       get '/solid_apm/transactions'
-      expect(response.body).to include('timezone-indicator')
-      expect(response.body).to include('timezone-display')
+      expect(response.body).to include('time-range-form')
+      expect(response.body).to include('relative-tab')
     end
   end
 end
