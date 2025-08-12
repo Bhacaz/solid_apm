@@ -1,6 +1,6 @@
 <%
   is_absolute_mode = params[:from_timestamp].present?
-  is_custom_range = (params[:quick_range].blank? && params[:from_value] && params[:from_unit]) || params[:quick_range] == 'custom'
+  is_custom_range = (params[:from_value].present? && params[:from_unit].present?) || params[:quick_range] == 'custom'
   
   time_ranges = {
     "Last 5 minutes" => "5m", "Last 15 minutes" => "15m", "Last 30 minutes" => "30m",

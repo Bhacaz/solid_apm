@@ -15,7 +15,6 @@ module SolidApm
       @transactions_scope = Transaction.where(timestamp: from_to_range)
       @transactions_scope = @transactions_scope.where(name: params[:name]) if params[:name].present?
       transaction_names = @transactions_scope.distinct.pluck(:name)
-      pp @transactions_scope.count
       latency_95p = @transactions_scope.group(:name).percentile(:duration, 0.95)
       latency_median = @transactions_scope.group(:name).median(:duration)
       tmp_dict = @transactions_scope.group(:name).group_by_minute(:timestamp,
@@ -68,9 +67,10 @@ module SolidApm
       if params[:from_timestamp].present? && params[:to_timestamp].present?
         from = Time.zone.at(params[:from_timestamp].to_i)
         to = Time.zone.at(params[:to_timestamp].to_i)
-      elsif params[:quick_range_apply].present?
+      elsif params[:quick_range_apply].present? || (params[:quick_range].present? && params[:quick_range] != 'custom')
         to = Time.current
-        from = case params[:quick_range_apply]
+        quick_range_value = params[:quick_range_apply] || params[:quick_range]
+        from = case quick_range_value
                when '5m'
                  5.minutes.ago
                when '15m'
@@ -94,13 +94,15 @@ module SolidApm
                else
                  1.hour.ago
                end
-      else
-        params[:from_value] ||= 60
-        params[:from_unit] ||= 'minutes'
+      elsif params[:from_value].present? && params[:from_unit].present?
         from = params[:from_value].to_i.public_send(params[:from_unit].to_sym).ago
-        params[:to_value] ||= 0
-        params[:to_unit] ||= 'seconds'
-        to = params[:to_value].to_i.public_send(params[:to_unit].to_sym).ago
+        to_value = params[:to_value].present? ? params[:to_value].to_i : 0
+        to_unit = params[:to_unit].present? ? params[:to_unit] : 'seconds'
+        to = to_value.public_send(to_unit.to_sym).ago
+      else
+        # Default fallback
+        from = 1.hour.ago
+        to = Time.current
       end
       (from..to)
     end

@@ -97,9 +97,9 @@ class TimeRangeForm {
     const quickRangeValue = quickRangeSelect?.value;
     
     if (quickRangeValue && quickRangeValue !== 'custom') {
-      this.removeFields(['from_value', 'from_unit', 'to_value', 'to_unit']);
-    } else {
-      this.removeFields(['quick_range', 'quick_range_apply']);
+      this.removeFields(['from_value', 'from_unit', 'to_value', 'to_unit', 'quick_range_apply']);
+    } else if (quickRangeValue === 'custom') {
+      this.removeFields(['quick_range_apply']);
     }
     
     this.removeFields(['from_datetime', 'to_datetime', 'from_timestamp', 'to_timestamp']);
@@ -108,16 +108,20 @@ class TimeRangeForm {
   initializeFormState() {
     const urlParams = new URLSearchParams(window.location.search);
     const hasCustomParams = urlParams.has('from_value') && urlParams.has('from_unit');
-    const hasQuickRange = urlParams.has('quick_range');
+    const hasQuickRange = urlParams.has('quick_range') && urlParams.get('quick_range') !== 'custom';
     const quickRangeSelect = this.form.querySelector('[name="quick_range"]');
     
-    if (hasQuickRange && !hasCustomParams) {
+    if (hasQuickRange) {
       this.toggleVisibility(this.customFromControl, false);
       this.toggleVisibility(this.customToControl, false);
-    } else if (hasCustomParams && !hasQuickRange) {
+    } else if (hasCustomParams || urlParams.get('quick_range') === 'custom') {
       if (quickRangeSelect) quickRangeSelect.value = 'custom';
       this.toggleVisibility(this.customFromControl, true);
       this.toggleVisibility(this.customToControl, true);
+    } else {
+      // Default state - show quick range only
+      this.toggleVisibility(this.customFromControl, false);
+      this.toggleVisibility(this.customToControl, false);
     }
   }
   
