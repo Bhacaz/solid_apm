@@ -39,7 +39,7 @@ end
 
 new_version = "#{major}.#{minor}.#{patch}"
 
-puts "Bumped version from #{current_version} to #{new_version}"
+puts "Bump version from #{current_version} to #{new_version}"
 # Ask for confirmation
 puts "Are you sure you want to bump the version to #{new_version}? (yes/no)"
 confirmation = STDIN.gets.chomp.strip.downcase
