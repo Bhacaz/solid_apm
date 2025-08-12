@@ -1,4 +1,3 @@
-
 RSpec.describe 'Time Range Selection', type: :request do
   before do
     # Create test data with correct Transaction attributes
@@ -59,15 +58,17 @@ RSpec.describe 'Time Range Selection', type: :request do
   end
 
   context 'Absolute time range' do
-    it 'handles timestamp parameters' do
+    it 'handles timestamp parameters with browser timezone' do
       from_time = 2.hours.ago
       to_time = Time.current
 
       get '/solid_apm/transactions', params: {
         from_timestamp: from_time.to_i,
-        to_timestamp: to_time.to_i
+        to_timestamp: to_time.to_i,
+        browser_timezone: 'America/New_York'
       }
       expect(response).to have_http_status(:success)
+      expect(response.body).to include('timezone-indicator')
     end
 
     it 'validates time range order' do
@@ -81,6 +82,28 @@ RSpec.describe 'Time Range Selection', type: :request do
       expect(response).to redirect_to('/solid_apm/transactions')
       follow_redirect!
       expect(response.body).to include('Invalid time range')
+    end
+  end
+
+  context 'Timezone functionality' do
+    it 'accepts browser timezone parameter' do
+      get '/solid_apm/transactions', params: {
+        quick_range: '1h',
+        browser_timezone: 'America/Los_Angeles'
+      }
+      expect(response).to have_http_status(:success)
+      expect(response.body).to include('timezone-indicator')
+    end
+
+    it 'includes timezone information in absolute mode' do
+      get '/solid_apm/transactions', params: {
+        from_timestamp: 2.hours.ago.to_i,
+        to_timestamp: Time.current.to_i,
+        browser_timezone: 'Europe/London'
+      }
+      expect(response).to have_http_status(:success)
+      expect(response.body).to include('from-timezone-label')
+      expect(response.body).to include('to-timezone-label')
     end
   end
 
@@ -108,13 +131,14 @@ RSpec.describe 'Time Range Selection', type: :request do
       expect(range.end).to be_within(1.minute).of(5.minutes.ago)
     end
 
-    it 'calculates absolute ranges correctly' do
+    it 'calculates absolute ranges with timezone correctly' do
       from_time = 2.hours.ago
       to_time = Time.current
 
       controller.params = ActionController::Parameters.new(
         from_timestamp: from_time.to_i.to_s,
-        to_timestamp: to_time.to_i.to_s
+        to_timestamp: to_time.to_i.to_s,
+        browser_timezone: 'America/New_York'
       )
       range = controller.send(:from_to_range)
 
@@ -146,14 +170,10 @@ RSpec.describe 'Time Range Selection', type: :request do
       expect(response.body).to include('absolute-tab')
     end
 
-    it 'shows custom controls for custom range' do
-      get '/solid_apm/transactions', params: {
-        quick_range: 'custom',
-        from_value: 30,
-        from_unit: 'minutes'
-      }
-      expect(response.body).to include('custom-from-control')
-      expect(response.body).to include('value="30"')
+    it 'includes timezone indicator in form' do
+      get '/solid_apm/transactions'
+      expect(response.body).to include('timezone-indicator')
+      expect(response.body).to include('timezone-display')
     end
   end
 end

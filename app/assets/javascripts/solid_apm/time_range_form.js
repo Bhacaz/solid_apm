@@ -8,12 +8,18 @@ class TimeRangeForm {
     this.customFromControl = document.getElementById('custom-from-control');
     this.customToControl = document.getElementById('custom-to-control');
     
+    // Timezone handling
+    this.browserTimezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+    this.timezoneOffset = new Date().getTimezoneOffset();
+    
     this.init();
   }
   
   init() {
     this.setupEventListeners();
     this.initializeFormState();
+    this.addTimezoneToForm();
+    this.adjustAbsoluteTimes();
   }
   
   setupEventListeners() {
@@ -88,6 +94,7 @@ class TimeRangeForm {
       
       this.addHiddenField('from_timestamp', fromTimestamp);
       this.addHiddenField('to_timestamp', toTimestamp);
+      this.addHiddenField('browser_timezone', this.browserTimezone);
       this.removeFields(['quick_range', 'from_value', 'from_unit', 'to_value', 'to_unit', 'quick_range_apply']);
     }
   }
@@ -150,6 +157,45 @@ class TimeRangeForm {
     params.forEach(param => url.searchParams.delete(param));
     window.history.replaceState({}, '', url);
   }
+  
+  // Timezone-related methods
+  addTimezoneToForm() {
+    // Add timezone information to form for server processing
+    this.addHiddenField('browser_timezone', this.browserTimezone);
+  }
+  
+  adjustAbsoluteTimes() {
+    // Convert timestamps from URL to browser timezone for datetime-local inputs
+    const urlParams = new URLSearchParams(window.location.search);
+    const fromTimestamp = urlParams.get('from_timestamp');
+    const toTimestamp = urlParams.get('to_timestamp');
+    
+    if (fromTimestamp && toTimestamp) {
+      const fromDatetime = this.form.querySelector('[name="from_datetime"]');
+      const toDatetime = this.form.querySelector('[name="to_datetime"]');
+      
+      if (fromDatetime && toDatetime) {
+        // Convert UTC timestamps to local datetime strings
+        const fromDate = new Date(parseInt(fromTimestamp) * 1000);
+        const toDate = new Date(parseInt(toTimestamp) * 1000);
+        
+        fromDatetime.value = this.formatDatetimeLocal(fromDate);
+        toDatetime.value = this.formatDatetimeLocal(toDate);
+      }
+    }
+  }
+  
+  formatDatetimeLocal(date) {
+    // Format date for datetime-local input (YYYY-MM-DDTHH:MM)
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    const hours = String(date.getHours()).padStart(2, '0');
+    const minutes = String(date.getMinutes()).padStart(2, '0');
+    
+    return `${year}-${month}-${day}T${hours}:${minutes}`;
+  }
+
 }
 
 // Global functions for onclick handlers (maintaining backward compatibility)

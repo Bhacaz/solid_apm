@@ -19,7 +19,20 @@ module SolidApm
       end
     end
 
-    def area_chart_options
+    def area_chart_options(browser_timezone: nil)
+      timezone_js = if browser_timezone.present?
+                      "if (!val) return ''; return new Date(val).toLocaleString('en-US', { timeZone: '#{browser_timezone}', hour12: false })"
+                    else
+                      "if (!val) return ''; return new Date(val).toLocaleString('en-US', { hour12: false })"
+                    end
+
+      # Create date formatter for x-axis labels that respects timezone
+      xaxis_formatter = if browser_timezone.present?
+                          "if (!val) return ''; return new Date(val).toLocaleString('en-US', { timeZone: '#{browser_timezone}', hour: '2-digit', minute: '2-digit', day: '2-digit', month: 'short', hour12: false })"
+                        else
+                          "if (!val) return ''; return new Date(val).toLocaleString('en-US', { hour: '2-digit', minute: '2-digit', day: '2-digit', month: 'short', hour12: false })"
+                        end
+
       {
         module: true,
         chart: {
@@ -57,6 +70,14 @@ module SolidApm
           type: 'datetime',
           tooltip: {
             enabled: false
+          },
+          labels: {
+            formatter: {
+              function: {
+                args: 'val',
+                body: xaxis_formatter
+              }
+            }
           }
         },
         stroke: {
@@ -77,7 +98,7 @@ module SolidApm
             formatter: {
               function: {
                 args: 'val',
-                body: 'return new Date(val).toLocaleString()'
+                body: timezone_js
               }
             }
           }

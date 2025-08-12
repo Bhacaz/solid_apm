@@ -8,7 +8,7 @@
       </div>
     </div>
     <div id="throughput-chart">
-      <%= area_chart({ name: 'req/min', data: @throughput_data }, area_chart_options.merge(colors: ['#43BCCD'], refresh: 30)) %>
+      <%= area_chart({ name: 'req/min', data: @throughput_data }, area_chart_options(browser_timezone: @browser_timezone).merge(colors: ['#43BCCD'], refresh: 30)) %>
     </div>
   </div>
   <div class="column">
@@ -20,12 +20,39 @@
       </div>
     </div>
     <div id="latency-chart">
-      <%= area_chart({ name: 'ms', data: @latency_data }, area_chart_options.merge(colors: ['#13d8aa'], refresh: 30)) %>
+      <%= area_chart({ name: 'ms', data: @latency_data }, area_chart_options(browser_timezone: @browser_timezone).merge(colors: ['#13d8aa'], refresh: 30)) %>
     </div>
   </div>
 </div>
 
 <script>
+// Chart selection functionality for time range
+function handleChartSelection(minTimestamp, maxTimestamp) {
+  const form = document.getElementById('time-range-form');
+  if (!form) return;
+  
+  // Convert chart selection to timestamps
+  const fromTimestamp = Math.floor(minTimestamp / 1000);
+  const toTimestamp = Math.floor(maxTimestamp / 1000);
+  
+  // Get browser timezone
+  const browserTimezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+  
+  // Create new URL with absolute time range
+  const url = new URL(window.location.href);
+  url.searchParams.set('from_timestamp', fromTimestamp);
+  url.searchParams.set('to_timestamp', toTimestamp);
+  url.searchParams.set('browser_timezone', browserTimezone);
+  
+  // Remove relative time parameters
+  ['quick_range', 'quick_range_apply', 'from_value', 'from_unit', 'to_value', 'to_unit'].forEach(param => {
+    url.searchParams.delete(param);
+  });
+  
+  // Navigate to new URL
+  window.location.href = url.toString();
+}
+
 // Chart refresh functionality
 function refreshCharts() {
   const form = document.getElementById('time-range-form');

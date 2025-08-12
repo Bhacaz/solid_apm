@@ -54,6 +54,9 @@ module SolidApm
       scope = @transactions_scope.public_send(grouping_method, :timestamp, range: from_to_range, **grouping_options)
       @throughput_data = scope.count
       @latency_data = scope.median(:duration).transform_values(&:to_i)
+
+      # Pass browser timezone info to view for chart rendering
+      @browser_timezone = params[:browser_timezone]
     end
 
     def spans
@@ -65,6 +68,7 @@ module SolidApm
 
     def from_to_range
       if params[:from_timestamp].present? && params[:to_timestamp].present?
+        # Timestamps from browser are already in UTC/local time
         from = Time.zone.at(params[:from_timestamp].to_i)
         to = Time.zone.at(params[:to_timestamp].to_i)
       elsif params[:quick_range_apply].present? || (params[:quick_range].present? && params[:quick_range] != 'custom')

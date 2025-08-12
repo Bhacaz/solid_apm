@@ -27,6 +27,7 @@
         <% end %>
       </div>
     </div>
+
   </div>
 
   <div id="relative-panel" class="<%= 'is-hidden' if is_absolute_mode %>">
@@ -82,12 +83,15 @@
     <div class="field is-grouped is-grouped-centered is-align-items-end">
       <% [['from', 1.hour.ago], ['to', Time.current]].each do |prefix, default_time| %>
         <div class="control">
-          <label class="label is-small"><%= prefix.capitalize %></label>
+          <label class="label is-small">
+            <%= prefix.capitalize %>
+          </label>
           <%= f.datetime_local_field "#{prefix}_datetime", 
                 value: (params["#{prefix}_timestamp"] ? 
                         Time.zone.at(params["#{prefix}_timestamp"].to_i).strftime('%Y-%m-%dT%H:%M') : 
                         default_time.strftime('%Y-%m-%dT%H:%M')),
-                class: 'input' %>
+                class: 'input',
+                id: "#{prefix}_datetime" %>
         </div>
       <% end %>
       <div class="control">
