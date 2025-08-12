@@ -1,10 +1,13 @@
 #!/usr/bin/env ruby
 # frozen_string_literal: true
 
-SEM = %w(majot minor patch)
+SEM = %w[major minor patch].freeze
 
 # raise if git not clean
 raise 'Git is not clean' unless system('git', 'diff', '--quiet')
+
+# raise if not on default branch
+raise 'Not on the default branch' unless `git rev-parse --abbrev-ref HEAD`.strip == 'main' || `git rev-parse --abbrev-ref HEAD`.strip == 'master'
 
 sem = ARGV[0]
 
@@ -13,8 +16,11 @@ if sem.nil? || !SEM.include?(sem)
   exit 1
 end
 
-current_version_file_content = File.read('lib/solid_apm/version.rb')
-current_version_file_content.match(/VERSION = \W(\d+\.\d+\.\d+)\W/)
+version_file_path = Dir.glob('lib/*/version.rb').first
+raise 'Version file not found in lib/*/version.rb' if version_file_path.nil?
+
+current_version_file_content = File.read(version_file_path)
+current_version_file_content =~ /VERSION = \W(\d+\.\d+\.\d+)\W/
 current_version = Regexp.last_match(1)
 
 major, minor, patch = current_version.split('.').map(&:to_i)
@@ -33,11 +39,17 @@ end
 
 new_version = "#{major}.#{minor}.#{patch}"
 
-File.open('lib/solid_apm/version.rb', 'w') do |file|
-  file.write(current_version_file_content.gsub(current_version, new_version))
+puts "Bumped version from #{current_version} to #{new_version}"
+# Ask for confirmation
+puts "Are you sure you want to bump the version to #{new_version}? (yes/no)"
+confirmation = STDIN.gets.chomp.strip.downcase
+
+unless confirmation == 'yes'
+  puts 'Version bump cancelled.'
+  exit 0
 end
 
-puts "Bumped version from #{current_version} to #{new_version}"
+File.write(version_file_path, current_version_file_content.gsub(current_version, new_version))
 
 begin
   system('bundle', 'install')
@@ -48,7 +60,7 @@ begin
 
   system('git', 'push')
   system('git', 'push', '--tags')
-rescue Exception => e
-  puts 'Failed: ' + e.message
+rescue StandardError => e
+  puts "Failed: #{e.message}"
   exit 1
 end
