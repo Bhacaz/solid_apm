@@ -1,34 +1,104 @@
-<%= form_with path: transactions_path, method: :get do |f| %>
-  <div class="is-flex is-flex-direction-row is-justify-content-center is-align-items-center" style="gap: 1em">
-    <%= f.number_field :from_value, value: params[:from_value] || 60, min: 1, class: 'input', style: 'width: 6em' %>
-    <div class="select">
-      <%= f.select :from_unit, {
-        "minutes" => "minutes",
-        "hours" => "hours",
-        "days" => "days",
-        "weeks" => "weeks",
-        "months" => "months",
-        "years" => "years"
-      }, {selected: params[:from_unit] || 'minutes' } %>
-    </div>
-    <b>→</b>
-    <%= f.number_field :to_value, value: params[:to_value] || 1, min: 1, class: 'input', style: 'width: 6em' %>
-    <div class="select">
-      <%= f.select :to_unit, {
-        "seconds" => "seconds",
-        "minutes" => "minutes",
-        "hours" => "hours",
-        "days" => "days",
-        "weeks" => "weeks",
-        "months" => "months",
-        "years" => "years"
-      }, {selected: params[:to_unit] || 'seconds' } %>
+<%
+  is_absolute_mode = params[:from_timestamp].present?
+  is_custom_range = (params[:from_value].present? && params[:from_unit].present?) || params[:quick_range] == 'custom'
+  
+  time_ranges = {
+    "Last 5 minutes" => "5m", "Last 15 minutes" => "15m", "Last 30 minutes" => "30m",
+    "Last 1 hour" => "1h", "Last 3 hours" => "3h", "Last 6 hours" => "6h", 
+    "Last 12 hours" => "12h", "Last 24 hours" => "24h", "Last 3 days" => "3d",
+    "Last 7 days" => "7d", "Custom" => "custom"
+  }
+  
+  time_units = %w[minutes hours days weeks months]
+  to_time_units = %w[seconds minutes hours days weeks]
+%>
+
+<%= form_with path: transactions_path, method: :get, local: true, id: 'time-range-form' do |f| %>
+  <div class="field is-grouped is-justify-content-center" style="margin-bottom: 1rem;">
+    <div class="control">
+      <div class="buttons has-addons">
+        <% [['Relative', !is_absolute_mode], ['Absolute', is_absolute_mode]].each do |label, is_active| %>
+          <button type="button" 
+                  class="button is-small <%= 'is-primary' if is_active %>" 
+                  id="<%= label.downcase %>-tab" 
+                  onclick="switchTo<%= label %>(event)">
+            <%= label %>
+          </button>
+        <% end %>
+      </div>
     </div>
 
-    <% if params[:name] %>
-      <%= f.hidden_field :name, value: params[:name] %>
-    <% end %>
+  </div>
 
-    <%= f.submit 'Apply', class: 'button' %>
+  <div id="relative-panel" class="<%= 'is-hidden' if is_absolute_mode %>">
+    <div class="field is-grouped is-grouped-centered is-align-items-end" style="flex-wrap: nowrap;">
+      <div class="control">
+        <div class="select">
+          <%= f.select :quick_range, time_ranges, {
+            selected: params[:quick_range] || (is_custom_range ? 'custom' : '1h'),
+            include_blank: false
+          }, {
+            class: 'select-input',
+            onchange: 'handleQuickRangeChange(this)'
+          } %>
+        </div>
+      </div>
+
+      <% [
+        { field: :from_value, default: 60, min: 1, units: time_units, default_unit: 'minutes', label: 'From', id: 'custom-from-control' },
+        { field: :to_value, default: 0, min: 0, units: to_time_units, default_unit: 'seconds', label: 'To', id: 'custom-to-control' }
+      ].each do |config| %>
+        <div class="control <%= 'is-hidden' unless is_custom_range %>" id="<%= config[:id] %>">
+          <label class="label is-small"><%= config[:label] %></label>
+          <div class="field has-addons">
+            <div class="control">
+              <%= f.number_field config[:field], 
+                    value: params[config[:field]] || config[:default], 
+                    min: config[:min], 
+                    class: 'input has-text-centered', 
+                    style: 'width: 3.5em' %>
+            </div>
+            <div class="control">
+              <div class="select">
+                <%= f.select "#{config[:field].to_s.split('_')[0]}_unit", config[:units], 
+                           { selected: params["#{config[:field].to_s.split('_')[0]}_unit"] || config[:default_unit] } %>
+              </div>
+            </div>
+            <div class="control">
+              <span class="button is-static">ago</span>
+            </div>
+          </div>
+        </div>
+      <% end %>
+
+      <div class="control">
+        <%= f.submit 'Apply', class: 'button is-primary' %>
+      </div>
+    </div>
+  </div>
+
+  <%= f.hidden_field :name, value: params[:name] if params[:name] %>
+
+  <div id="absolute-panel" class="<%= 'is-hidden' unless is_absolute_mode %>">
+    <div class="field is-grouped is-grouped-centered is-align-items-end">
+      <% [['from', 1.hour.ago], ['to', Time.current]].each do |prefix, default_time| %>
+        <div class="control">
+          <label class="label is-small">
+            <%= prefix.capitalize %>
+          </label>
+          <%= f.datetime_local_field "#{prefix}_datetime", 
+                value: (params["#{prefix}_timestamp"] ? 
+                        Time.zone.at(params["#{prefix}_timestamp"].to_i).strftime('%Y-%m-%dT%H:%M') : 
+                        default_time.strftime('%Y-%m-%dT%H:%M')),
+                class: 'input',
+                id: "#{prefix}_datetime" %>
+        </div>
+      <% end %>
+      <div class="control">
+        <%= f.submit 'Apply', class: 'button is-primary' %>
+      </div>
+    </div>
   </div>
 <% end %>
+
+<%= javascript_include_tag 'solid_apm/time_range_form' %>
