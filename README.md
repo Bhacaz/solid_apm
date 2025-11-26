@@ -7,6 +7,10 @@ Rails engine to manage APM data without using a third party service.
 <img src="./docs/img_1.png" width="600px">
 <img src="./docs/img_2.png" width="600px">
 
+
+> [!NOTE]
+For a more **mature** solution (but dependent on Redis) have look to [rails_performance](https://github.com/igorkasyanchuk/rails_performance).
+
 ## Installation
 
 Add to your Gemfile:
