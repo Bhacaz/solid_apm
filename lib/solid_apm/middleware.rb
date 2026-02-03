@@ -7,10 +7,12 @@ module SolidApm
     end
 
     def call(env)
+      return @app.call(env) unless SolidApm.enabled
+
       self.class.init_transaction
       status, headers, body = @app.call(env)
 
-        env['rack.after_reply'] ||= []
+      env['rack.after_reply'] ||= []
         env['rack.after_reply'] << ->() do
           self.class.call
         rescue StandardError => e
@@ -25,8 +27,8 @@ module SolidApm
       SpanSubscriber::Base.transaction = nil
 
       if transaction.nil? ||
-          transaction_filtered?(transaction.name) ||
-          !Sampler.should_sample?
+         transaction_filtered?(transaction.name) ||
+         !Sampler.should_sample?
 
         SpanSubscriber::Base.spans = nil
         return

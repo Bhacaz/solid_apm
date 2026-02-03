@@ -4,7 +4,9 @@ module SolidApm
   class Engine < ::Rails::Engine
     isolate_namespace SolidApm
 
-    config.app_middleware.use Middleware
+    initializer 'solid_apm.middleware', before: :build_middleware_stack do |app|
+      app.middleware.use SolidApm::Middleware if SolidApm.enabled
+    end
 
     initializer 'solid_apm.assets' do |app|
       # Add engine's assets to the load path for both Propshaft and Sprockets
@@ -49,7 +51,7 @@ module SolidApm
     end
 
     config.after_initialize do
-      SpanSubscriber::Base.subscribe!
+      SpanSubscriber::Base.subscribe! if SolidApm.enabled
     end
   end
 end

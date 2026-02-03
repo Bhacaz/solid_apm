@@ -99,6 +99,18 @@ The sampling is done per-thread using a round-robin counter, ensuring even distr
 This is useful for high-traffic applications where you want to reduce the volume of
 APM data while still maintaining representative performance insights.
 
+### Test Environment
+
+**SolidAPM is automatically disabled in the test
+environment** to prevent test pollution and improve test performance.
+
+You can disable SolidAPM in other environments if needed:
+
+```ruby
+# config/environments/staging.rb
+SolidApm.enabled = false
+```
+
 ### Transaction Name Filtering
 
 Filter specific transactions by name using exact string matches or regular expressions:

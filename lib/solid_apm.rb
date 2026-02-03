@@ -4,6 +4,7 @@ require 'active_median'
 require 'apexcharts'
 
 require 'solid_apm/version'
+require 'solid_apm/railtie'
 require 'solid_apm/engine'
 require 'solid_apm/sampler'
 require 'solid_apm/cleanup_service'
@@ -13,6 +14,7 @@ module SolidApm
   mattr_accessor :mcp_server_config, default: {}
   mattr_accessor :silence_active_record_logger, default: true
   mattr_accessor :transaction_sampling, default: 1
+  mattr_accessor :enabled, default: true
   mattr_accessor(
     :transaction_filters, default: [
       /^SolidApm::/,
