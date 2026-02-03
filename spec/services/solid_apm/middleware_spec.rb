@@ -1,6 +1,23 @@
 # frozen_string_literal: true
 
 RSpec.describe SolidApm::Middleware do
+  describe 'when disabled' do
+    it 'passes through without tracking' do
+      original = SolidApm.enabled
+      SolidApm.enabled = false
+
+      app = ->(_env) { [200, {}, ['OK']] }
+      middleware = described_class.new(app)
+
+      status, _headers, _body = middleware.call({})
+
+      expect(status).to eq(200)
+      expect(SolidApm::SpanSubscriber::Base.transaction).to be_nil
+
+      SolidApm.enabled = original
+    end
+  end
+
   describe '.transaction_filtered?' do
     before do
       SolidApm.transaction_filters = []
