@@ -2,10 +2,15 @@
 
 RSpec.describe SolidApm::Middleware do
   describe 'when disabled' do
-    it 'passes through without tracking' do
+    around do |example|
       original = SolidApm.enabled
       SolidApm.enabled = false
+      example.run
+    ensure
+      SolidApm.enabled = original
+    end
 
+    it 'passes through without tracking' do
       app = ->(_env) { [200, {}, ['OK']] }
       middleware = described_class.new(app)
 
@@ -13,8 +18,6 @@ RSpec.describe SolidApm::Middleware do
 
       expect(status).to eq(200)
       expect(SolidApm::SpanSubscriber::Base.transaction).to be_nil
-
-      SolidApm.enabled = original
     end
   end
 
